@@ -1,85 +1,55 @@
 import { createClient } from "@supabase/supabase-js";
+import { IncomingForm } from "formidable";
+import fs from "fs";
 
-export const config = {
-  api: {
-    bodyParser: false, // important: we handle form-data manually
-  },
-};
+export const config = { api: { bodyParser: false } };
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  try {
-    const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
+  const form = new IncomingForm({ multiples: true });
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE);
+  form.parse(req, async (err, fields, files) => {
+    if (err) return res.status(500).json({ error: "Form parsing failed" });
 
-    // Parse Form Data Manually (No multer needed)
-    const form = await new Promise((resolve, reject) => {
-      const busboy = require("busboy")({ headers: req.headers });
+    try {
+      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE);
 
-      const fields = {};
-      const files = [];
+      let mediaUrls = [];
 
-      busboy.on("field", (name, value) => {
-        fields[name] = value;
-      });
+      if (files.media) {
+        let fileArray = Array.isArray(files.media) ? files.media : [files.media];
 
-      busboy.on("file", (name, file, info) => {
-        let fileData = [];
-        file.on("data", (data) => fileData.push(data));
-        file.on("end", () => {
-          files.push({
-            filename: info.filename,
-            type: info.mimeType,
-            buffer: Buffer.concat(fileData),
-          });
-        });
-      });
+        for (const file of fileArray) {
+          if (!file || !file.originalFilename) continue;
 
-      busboy.on("finish", () => resolve({ fields, files }));
-      busboy.on("error", reject);
+          const fileBuffer = fs.readFileSync(file.filepath);
+          const fileName = `${Date.now()}-${file.originalFilename}`;
 
-      req.pipe(busboy);
-    });
+          const { error: uploadError } = await supabase.storage
+            .from("evidence")
+            .upload(fileName, fileBuffer, { contentType: file.mimetype });
 
-    const mediaUrls = [];
+          if (uploadError) throw uploadError;
 
-    // Upload evidence to Supabase Storage
-    for (const file of form.files) {
-      const ext = file.filename.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()}.${ext}`;
+          const { data } = supabase.storage.from("evidence").getPublicUrl(fileName);
+          mediaUrls.push(data.publicUrl);
+        }
+      }
 
-      await supabase.storage
-        .from("evidence")
-        .upload(fileName, file.buffer, { contentType: file.type });
+      await supabase.from("reports").insert([{
+        name: fields.name || "Anonymous",
+        grade_level: fields.grade_level,
+        location: fields.location,
+        report_type: fields.report_type,
+        description: fields.description,
+        media_urls: mediaUrls
+      }]);
 
-      // Get public URL
-      const { data } = supabase.storage
-        .from("evidence")
-        .getPublicUrl(fileName);
-
-      mediaUrls.push(data.publicUrl);
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      console.error("SERVER ERROR:", error);
+      return res.status(500).json({ error: "Server error" });
     }
-
-    // Save report to DB
-    await supabase.from("reports").insert([
-      {
-        name: form.fields.name,
-        grade_level: form.fields.grade_level,
-        location: form.fields.location,
-        report_type: form.fields.report_type,
-        description: form.fields.description,
-        media_urls: mediaUrls,
-      },
-    ]);
-
-    return res.status(200).send("Report submitted successfully");
-  } catch (err) {
-    console.error("SERVER ERROR:", err);
-    return res.status(500).json({ error: "Server error" });
-  }
+  });
 }

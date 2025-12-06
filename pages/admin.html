@@ -1,58 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Admin Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body class="bg-gray-100 p-6">
-
-<div class="max-w-4xl mx-auto bg-white p-6 rounded shadow-lg">
-
-  <h1 class="text-2xl font-bold">Admin Reports</h1>
-
-  <table class="w-full mt-4 border">
-    <thead>
-      <tr class="bg-gray-200">
-        <th class="p-2 border">Date</th>
-        <th class="p-2 border">Name</th>
-        <th class="p-2 border">Grade</th>
-        <th class="p-2 border">Location</th>
-        <th class="p-2 border">Type</th>
-        <th class="p-2 border">Media</th>
-      </tr>
-    </thead>
-    <tbody id="reportsTable"></tbody>
-  </table>
-
-</div>
+  <div class="max-w-6xl mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Admin Dashboard</h1>
+    <table class="min-w-full border border-gray-300">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="p-2 border">Date</th>
+          <th class="p-2 border">Name</th>
+          <th class="p-2 border">Grade</th>
+          <th class="p-2 border">Location</th>
+          <th class="p-2 border">Type</th>
+          <th class="p-2 border">Description</th>
+          <th class="p-2 border">Media</th>
+        </tr>
+      </thead>
+      <tbody id="reportsTable"></tbody>
+    </table>
+  </div>
 
 <script>
 async function loadReports() {
-  let res = await fetch("/api/admin");
-  let reports = await res.json();
-
-  let table = document.getElementById("reportsTable");
+  const res = await fetch("/api/admin");
+  const reports = await res.json();
+  const table = document.getElementById("reportsTable");
   table.innerHTML = "";
-
   reports.forEach(r => {
+    const mediaHTML = r.media_urls?.length
+      ? r.media_urls.map(url => `<a href="${url}" target="_blank" class="text-blue-600 underline">View</a>`).join("<br>")
+      : "No media";
     table.innerHTML += `
       <tr>
-        <td class="border p-2">${r.created_at}</td>
-        <td class="border p-2">${r.name || "Anonymous"}</td>
+        <td class="border p-2">${new Date(r.created_at).toLocaleString()}</td>
+        <td class="border p-2">${r.name}</td>
         <td class="border p-2">${r.grade_level}</td>
         <td class="border p-2">${r.location}</td>
         <td class="border p-2">${r.report_type}</td>
-        <td class="border p-2">
-          ${r.media_urls.map(url => `<a href="${url}" target="_blank">Open</a>`).join("<br>")}
-        </td>
+        <td class="border p-2">${r.description}</td>
+        <td class="border p-2">${mediaHTML}</td>
       </tr>
     `;
   });
 }
-
 loadReports();
 </script>
-
 </body>
 </html>

@@ -1,65 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bullying Report Form</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Report Bullying</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body class="bg-gray-100 p-6">
-  <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-    <h1 class="text-2xl font-bold mb-4">Report a Bullying Incident</h1>
-
+  <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">Report Bullying</h1>
     <form id="reportForm" enctype="multipart/form-data">
-      <label class="block mb-2 font-semibold">Your Name (optional)</label>
-      <input class="w-full mb-4 p-2 border rounded" name="name" />
-
-      <label class="block mb-2 font-semibold">Grade Level</label>
-      <select class="w-full mb-4 p-2 border rounded" name="grade_level" required>
-        <option>7</option><option>8</option><option>9</option><option>10</option>
-      </select>
-
-      <label class="block mb-2 font-semibold">Location of Incident</label>
-      <input class="w-full mb-4 p-2 border rounded" name="location" required />
-
-      <label class="block mb-2 font-semibold">Type of Report</label>
-      <select class="w-full mb-4 p-2 border rounded" name="report_type" required>
-        <option>Bullying</option>
-        <option>Harassment</option>
-        <option>Threat</option>
-        <option>Physical Violence</option>
-      </select>
-
-      <label class="block mb-2 font-semibold">Description</label>
-      <textarea class="w-full mb-4 p-2 border rounded" name="description" required></textarea>
-
-      <label class="block mb-2 font-semibold">Upload Proof (Image/Video)</label>
-      <input type="file" name="media" multiple class="mb-4" accept="image/*,video/*" />
-
-      <button class="w-full bg-blue-600 text-white py-2 rounded" type="submit">
-        Submit Report
-      </button>
+      <input class="border p-2 w-full mb-2" name="name" placeholder="Your Name (optional)" />
+      <input class="border p-2 w-full mb-2" name="grade_level" placeholder="Grade Level" required />
+      <input class="border p-2 w-full mb-2" name="location" placeholder="Location" required />
+      <input class="border p-2 w-full mb-2" name="report_type" placeholder="Type of Report" required />
+      <textarea class="border p-2 w-full mb-2" name="description" placeholder="Description" required></textarea>
+      <input type="file" name="media" multiple class="mb-2" />
+      <button type="submit" class="bg-blue-500 text-white p-2 rounded w-full">Submit Report</button>
     </form>
-
-    <p id="status" class="mt-4 text-center"></p>
+    <p id="status" class="mt-2"></p>
   </div>
 
 <script>
-document.getElementById("reportForm").addEventListener("submit", async (e) => {
+document.getElementById("reportForm").addEventListener("submit", async e => {
   e.preventDefault();
-
-  let formData = new FormData(e.target);
-
-  let res = await fetch("/api/report", {
-    method: "POST",
-    body: formData
-  });
-
-  let data = await res.text();
-  document.getElementById("status").innerText = data;
+  const form = e.target;
+  const formData = new FormData(form);
+  const res = await fetch("/api/report", { method: "POST", body: formData });
+  const data = await res.json();
+  document.getElementById("status").innerText = data.success ? "Report submitted successfully!" : data.error;
+  if(data.success) form.reset();
 });
 </script>
-
 </body>
 </html>
