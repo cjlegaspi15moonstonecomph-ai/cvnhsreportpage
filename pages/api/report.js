@@ -2,10 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 import { IncomingForm } from "formidable";
 import fs from "fs";
 
-export const config = { api: { bodyParser: false } };
+export const config = {
+  api: { bodyParser: false }
+};
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== "POST")
+    return res.status(405).json({ error: "Method not allowed" });
 
   const form = new IncomingForm({ multiples: true });
 
@@ -13,14 +16,18 @@ export default async function handler(req, res) {
     if (err) return res.status(500).json({ error: "Form parsing failed" });
 
     try {
-      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE);
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE
+      );
 
+      // SAFE FILE HANDLING
       let mediaUrls = [];
 
       if (files.media) {
-        let fileArray = Array.isArray(files.media) ? files.media : [files.media];
+        const uploads = Array.isArray(files.media) ? files.media : [files.media];
 
-        for (const file of fileArray) {
+        for (const file of uploads) {
           if (!file || !file.originalFilename) continue;
 
           const fileBuffer = fs.readFileSync(file.filepath);
@@ -28,23 +35,31 @@ export default async function handler(req, res) {
 
           const { error: uploadError } = await supabase.storage
             .from("evidence")
-            .upload(fileName, fileBuffer, { contentType: file.mimetype });
+            .upload(fileName, fileBuffer, {
+              contentType: file.mimetype,
+            });
 
           if (uploadError) throw uploadError;
 
-          const { data } = supabase.storage.from("evidence").getPublicUrl(fileName);
+          const { data } = supabase.storage
+            .from("evidence")
+            .getPublicUrl(fileName);
+
           mediaUrls.push(data.publicUrl);
         }
       }
 
-      await supabase.from("reports").insert([{
-        name: fields.name || "Anonymous",
-        grade_level: fields.grade_level,
-        location: fields.location,
-        report_type: fields.report_type,
-        description: fields.description,
-        media_urls: mediaUrls
-      }]);
+      // Insert report
+      await supabase.from("reports").insert([
+        {
+          name: fields.name || "Anonymous",
+          grade_level: fields.grade_level,
+          location: fields.location,
+          report_type: fields.report_type,
+          description: fields.description,
+          media_urls: mediaUrls
+        }
+      ]);
 
       return res.status(200).json({ success: true });
     } catch (error) {
