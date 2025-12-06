@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-4xl mx-auto bg-white p-6 rounded shadow-lg">
+
+  <h1 class="text-2xl font-bold">Admin Reports</h1>
+
+  <table class="w-full mt-4 border">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="p-2 border">Date</th>
+        <th class="p-2 border">Name</th>
+        <th class="p-2 border">Grade</th>
+        <th class="p-2 border">Location</th>
+        <th class="p-2 border">Type</th>
+        <th class="p-2 border">Media</th>
+      </tr>
+    </thead>
+    <tbody id="reportsTable"></tbody>
+  </table>
+
+</div>
+
+<script>
+async function loadReports() {
+  let res = await fetch("/api/admin");
+  let reports = await res.json();
+
+  let table = document.getElementById("reportsTable");
+  table.innerHTML = "";
+
+  reports.forEach(r => {
+    table.innerHTML += `
+      <tr>
+        <td class="border p-2">${r.created_at}</td>
+        <td class="border p-2">${r.name || "Anonymous"}</td>
+        <td class="border p-2">${r.grade_level}</td>
+        <td class="border p-2">${r.location}</td>
+        <td class="border p-2">${r.report_type}</td>
+        <td class="border p-2">
+          ${r.media_urls.map(url => `<a href="${url}" target="_blank">Open</a>`).join("<br>")}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+loadReports();
+</script>
+
+</body>
+</html>
