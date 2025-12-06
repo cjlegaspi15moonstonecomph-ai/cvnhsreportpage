@@ -1,35 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Report Bullying</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>School Incident Reporting System</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-2xl font-bold mb-4">Report Bullying</h1>
-    <form id="reportForm" enctype="multipart/form-data">
-      <input class="border p-2 w-full mb-2" name="name" placeholder="Your Name (optional)" />
-      <input class="border p-2 w-full mb-2" name="grade_level" placeholder="Grade Level" required />
-      <input class="border p-2 w-full mb-2" name="location" placeholder="Location" required />
-      <input class="border p-2 w-full mb-2" name="report_type" placeholder="Type of Report" required />
-      <textarea class="border p-2 w-full mb-2" name="description" placeholder="Description" required></textarea>
-      <input type="file" name="media" multiple class="mb-2" />
-      <button type="submit" class="bg-blue-500 text-white p-2 rounded w-full">Submit Report</button>
-    </form>
-    <p id="status" class="mt-2"></p>
-  </div>
+
+<body class="bg-gray-100 min-h-screen flex justify-center items-center p-4">
+
+<div class="w-full max-w-2xl bg-white shadow-lg rounded-2xl p-6">
+
+  <h2 class="text-2xl font-bold text-center mb-4 text-blue-700">
+    School Incident Reporting Form
+  </h2>
+
+  <form id="reportForm" enctype="multipart/form-data" class="space-y-4">
+
+    <!-- Name -->
+    <div>
+      <label class="font-semibold">Your Name (optional)</label>
+      <input type="text" name="name" placeholder="Enter your name (or leave blank)" 
+        class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
+    </div>
+
+    <!-- Grade Level -->
+    <div>
+      <label class="font-semibold">Grade Level</label>
+      <select name="grade_level" required
+        class="w-full p-2 border rounded-lg bg-white focus:ring focus:ring-blue-300">
+        <option value="">Select Grade Level</option>
+        <option value="Grade 7">Grade 7</option>
+        <option value="Grade 8">Grade 8</option>
+        <option value="Grade 9">Grade 9</option>
+        <option value="Grade 10">Grade 10</option>
+        <option value="Grade 11">Grade 11</option>
+        <option value="Grade 12">Grade 12</option>
+      </select>
+    </div>
+
+    <!-- Location -->
+    <div>
+      <label class="font-semibold">Location of Incident</label>
+      <input type="text" name="location" required placeholder="Ex: Hallway, Canteen, Classroom..."
+        class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
+    </div>
+
+    <!-- Type of Report -->
+    <div>
+      <label class="font-semibold">Type of Report</label>
+      <select name="report_type" id="report_type" required
+        class="w-full p-2 border rounded-lg bg-white focus:ring focus:ring-blue-300">
+        <option value="">Select Type of Report</option>
+        <option value="Bullying">Bullying</option>
+        <option value="Harassment">Harassment</option>
+        <option value="Physical Violence">Physical Violence</option>
+        <option value="Theft">Theft</option>
+        <option value="Vandalism">Vandalism</option>
+        <option value="Cyber Incident">Cyber Incident</option>
+        <option value="Student Misconduct">Student Misconduct</option>
+        <option value="Substance Issue">Substance Issue</option>
+        <option value="Emergency or Safety Concern">Emergency or Safety Concern</option>
+        <option value="Other">Other (please specify)</option>
+      </select>
+    </div>
+
+    <!-- Other type field (hidden) -->
+    <div id="otherField" class="hidden">
+      <label class="font-semibold">Please specify</label>
+      <input type="text" id="otherInput" placeholder="Describe the type"
+        class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="font-semibold">Description</label>
+      <textarea name="description" required rows="4"
+        placeholder="Describe what happened..."
+        class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300"></textarea>
+    </div>
+
+    <!-- File upload -->
+    <div>
+      <label class="font-semibold">Upload Evidence (images/videos)</label>
+      <input type="file" name="media" multiple
+        class="w-full p-2 border rounded-lg bg-white focus:ring focus:ring-blue-300">
+      <p class="text-sm text-gray-500 mt-1">You may upload photos or videos.</p>
+    </div>
+
+    <!-- Submit -->
+    <button type="submit"
+      class="w-full bg-blue-600 text-white py-2 rounded-lg text-lg font-semibold hover:bg-blue-700">
+      Submit Report
+    </button>
+
+    <!-- Status -->
+    <p id="status" class="text-center font-semibold mt-2"></p>
+
+  </form>
+</div>
 
 <script>
-document.getElementById("reportForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-  const res = await fetch("/api/report", { method: "POST", body: formData });
-  const data = await res.json();
-  document.getElementById("status").innerText = data.success ? "Report submitted successfully!" : data.error;
-  if(data.success) form.reset();
-});
+  // Show "Other" input if selected
+  document.getElementById("report_type").addEventListener("change", function () {
+    if (this.value === "Other") {
+      document.getElementById("otherField").classList.remove("hidden");
+    } else {
+      document.getElementById("otherField").classList.add("hidden");
+      document.getElementById("otherInput").value = "";
+    }
+  });
+
+  // Submit form
+  document.getElementById("reportForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const form = new FormData(this);
+    const status = document.getElementById("status");
+
+    // If Other is used, override the report_type
+    if (form.get("report_type") === "Other") {
+      form.set("report_type", document.getElementById("otherInput").value.trim());
+    }
+
+    status.textContent = "Submitting...";
+
+    try {
+      const response = await fetch("/api/report", {
+        method: "POST",
+        body: form,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        status.textContent = "Report submitted successfully!";
+        status.className = "text-green-600 text-center font-semibold";
+        this.reset();
+        document.getElementById("otherField").classList.add("hidden");
+      } else {
+        status.textContent = "Failed to submit report.";
+        status.className = "text-red-600 text-center font-semibold";
+      }
+    } catch (err) {
+      status.textContent = "An error occurred. Please try again.";
+      status.className = "text-red-600 text-center font-semibold";
+    }
+  });
 </script>
+
 </body>
 </html>
