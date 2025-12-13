@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard - Reports</title>
+
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -21,6 +22,28 @@
       font-weight: 700;
       letter-spacing: 1px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header span {
+      margin-left: 20px;
+    }
+
+    .logout-btn {
+      margin-right: 20px;
+      padding: 8px 14px;
+      background: #ef4444;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .logout-btn:hover {
+      background: #dc2626;
     }
 
     .container {
@@ -64,7 +87,14 @@
     .evidence-img {
       width: 120px;
       border-radius: 8px;
+      margin: 5px 0;
+      display: block;
+    }
+
+    video {
+      width: 160px;
       margin-top: 5px;
+      border-radius: 8px;
     }
 
     .file-link {
@@ -90,12 +120,17 @@
     }
   </style>
 </head>
+
 <body>
 
-<header>Admin Dashboard – Submitted Reports</header>
+<header>
+  <span>Admin Dashboard – Submitted Reports</span>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</header>
 
 <div class="container">
   <h2>All Reports</h2>
+
   <table id="reportsTable">
     <thead>
       <tr>
@@ -118,10 +153,16 @@
 async function loadReports() {
   try {
     const res = await fetch("/api/admin/getReports");
-    const data = await res.json();
 
+    // 🔐 Not logged in → redirect
+    if (res.status === 401) {
+      window.location.href = "/admin-login.html";
+      return;
+    }
+
+    const data = await res.json();
     const body = document.getElementById("reportBody");
-    body.innerHTML = ""; // Clear table
+    body.innerHTML = "";
 
     if (!data || data.length === 0) {
       body.innerHTML = '<tr><td colspan="7" class="no-data">No reports found.</td></tr>';
@@ -131,15 +172,25 @@ async function loadReports() {
     data.forEach(r => {
       let evidenceHTML = "No file";
 
-      if (r.fileUrl) {
-        const ext = r.fileUrl.split(".").pop().toLowerCase();
+      if (Array.isArray(r.raw_media_urls) && r.raw_media_urls.length > 0) {
+        evidenceHTML = r.raw_media_urls.map(url => {
+          const ext = url.split(".").pop().toLowerCase();
 
-        if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
-          evidenceHTML = `<img src="${r.fileUrl}" class="evidence-img">`;
-        } else {
-          evidenceHTML = `<a class="file-link" href="${r.fileUrl}" target="_blank">View File</a>`;
-        }
+          if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
+            return `<img src="${url}" class="evidence-img">`;
+          }
+
+          if (["mp4", "webm", "ogg"].includes(ext)) {
+            return `<video controls src="${url}"></video>`;
+          }
+
+          return `<a class="file-link" href="${url}" target="_blank">View File</a>`;
+        }).join("");
       }
+
+      const date = r.created_at
+        ? new Date(r.created_at).toLocaleString()
+        : "";
 
       body.innerHTML += `
         <tr>
@@ -149,7 +200,7 @@ async function loadReports() {
           <td>${r.location}</td>
           <td>${r.message}</td>
           <td>${evidenceHTML}</td>
-          <td>${r.created_at}</td>
+          <td>${date}</td>
         </tr>
       `;
     });
@@ -158,6 +209,11 @@ async function loadReports() {
     document.getElementById("reportBody").innerHTML =
       `<tr><td colspan="7" class="no-data">Error loading reports</td></tr>`;
   }
+}
+
+async function logout() {
+  await fetch("/api/admin/logout");
+  window.location.href = "/admin-login.html";
 }
 
 loadReports();

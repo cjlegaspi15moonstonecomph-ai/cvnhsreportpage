@@ -1,4 +1,7 @@
 node_modules/
-.next/
-.DS_Store
 .env
+.next/
+.vercel/
+uploads/
+create-admin.js
+
