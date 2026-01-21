@@ -193,6 +193,13 @@
       status.className = "text-red-600 text-center font-semibold";
     }
   });
+
+  // Check if student_token exists
+const token = document.cookie.split('; ').find(row => row.startsWith('student_token='));
+if (!token) {
+  window.location.href = "/index-login.html"; // redirect to login
+}
+
 </script>
 
 </body>

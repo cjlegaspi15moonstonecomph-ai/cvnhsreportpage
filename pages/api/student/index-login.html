@@ -1,0 +1,32 @@
+<h2>Mag-login gamit ang LRN</h2>
+<form id="loginForm">
+  <input type="text" name="lrn" placeholder="Ilagay ang iyong LRN" required>
+  <input type="password" name="password" placeholder="Password (optional)">
+  <button type="submit">Mag-login</button>
+  <p id="status"></p>
+</form>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const res = await fetch("/api/student/login", {
+    method: "POST",
+    body: JSON.stringify({
+      lrn: form.get("lrn"),
+      password: form.get("password")
+    }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const result = await res.json();
+  const status = document.getElementById("status");
+
+  if (result.success) {
+    status.textContent = "Matagumpay na naka-login!";
+    // Redirect to the report form page
+    window.location.href = "/index.html";
+  } else {
+    status.textContent = result.error;
+  }
+});
+</script>
