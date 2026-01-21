@@ -1,4 +1,13 @@
 {
+  
+  "name": "cvnhsreportpage",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
     "@simplewebauthn/server": "^13.2.2",
     "@supabase/supabase-js": "^2.1.0",
@@ -10,3 +19,6 @@
     "react-dom": "^18.2.0"
   }
 }
+
+
+                             

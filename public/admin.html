@@ -1,124 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard - Reports</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Admin Dashboard - Reports</title>
 
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #eef1f5;
-      margin: 0;
-      padding: 0;
-    }
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: #eef1f5;
+    margin: 0;
+    padding: 0;
+  }
 
-    header {
-      background: #1e3a8a;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      font-size: 25px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+  header {
+    background: #1e3a8a;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
 
-    header span {
-      margin-left: 20px;
-    }
+  header span {
+    font-size: 22px;
+    font-weight: 700;
+  }
 
-    .logout-btn {
-      margin-right: 20px;
-      padding: 8px 14px;
-      background: #ef4444;
-      border: none;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
+  .logout-btn {
+    padding: 8px 14px;
+    background: #ef4444;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
 
-    .logout-btn:hover {
-      background: #dc2626;
-    }
+  .logout-btn:hover {
+    background: #dc2626;
+  }
 
-    .container {
-      width: 95%;
-      margin: 25px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    }
+  .container {
+    width: 95%;
+    margin: 25px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
 
-    h2 {
-      margin-top: 0;
-      font-size: 22px;
-      color: #1e3a8a;
-    }
+  h2 {
+    margin-top: 0;
+    font-size: 22px;
+    color: #1e3a8a;
+  }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
 
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-      vertical-align: top;
-    }
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    vertical-align: top;
+  }
 
-    th {
-      background: #1e3a8a;
-      color: white;
-      font-size: 14px;
-    }
+  th {
+    background: #1e3a8a;
+    color: white;
+    font-size: 14px;
+  }
 
-    tr:hover {
-      background: #f3f4f6;
-    }
+  tr:hover {
+    background: #f3f4f6;
+  }
 
-    .evidence-img {
-      width: 120px;
-      border-radius: 8px;
-      margin: 5px 0;
-      display: block;
-    }
+  .evidence-img {
+    width: 120px;
+    border-radius: 8px;
+    margin: 5px 0;
+    display: block;
+  }
 
-    video {
-      width: 160px;
-      margin-top: 5px;
-      border-radius: 8px;
-    }
+  video {
+    width: 160px;
+    margin-top: 5px;
+    border-radius: 8px;
+  }
 
-    .file-link {
-      display: inline-block;
-      padding: 5px 10px;
-      background: #2563eb;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      margin-top: 5px;
-      font-size: 13px;
-    }
+  .file-link {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-top: 5px;
+    font-size: 13px;
+  }
 
-    .file-link:hover {
-      background: #1d4ed8;
-    }
+  .file-link:hover {
+    background: #1d4ed8;
+  }
 
-    .no-data {
-      text-align: center;
-      padding: 30px;
-      font-size: 18px;
-      color: gray;
-    }
-  </style>
+  .description {
+    white-space: pre-wrap; /* preserve line breaks from textarea */
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 30px;
+    font-size: 18px;
+    color: gray;
+  }
+</style>
 </head>
 
 <body>
@@ -130,7 +131,6 @@
 
 <div class="container">
   <h2>All Reports</h2>
-
   <table id="reportsTable">
     <thead>
       <tr>
@@ -138,7 +138,7 @@
         <th>Grade</th>
         <th>Type of Report</th>
         <th>Location</th>
-        <th>Message</th>
+        <th>Description
         <th>Evidence</th>
         <th>Date</th>
       </tr>
@@ -154,7 +154,7 @@ async function loadReports() {
   try {
     const res = await fetch("/api/admin/getReports");
 
-    // 🔐 Not logged in → redirect
+    // Not logged in → redirect
     if (res.status === 401) {
       window.location.href = "/admin-login.html";
       return;
@@ -176,11 +176,11 @@ async function loadReports() {
         evidenceHTML = r.raw_media_urls.map(url => {
           const ext = url.split(".").pop().toLowerCase();
 
-          if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
+          if (["jpg","jpeg","png","gif"].includes(ext)) {
             return `<img src="${url}" class="evidence-img">`;
           }
 
-          if (["mp4", "webm", "ogg"].includes(ext)) {
+          if (["mp4","webm","ogg"].includes(ext)) {
             return `<video controls src="${url}"></video>`;
           }
 
@@ -198,7 +198,7 @@ async function loadReports() {
           <td>${r.grade}</td>
           <td>${r.reportType}</td>
           <td>${r.location}</td>
-          <td>${r.message}</td>
+          <td class="description">${r.description}</td>
           <td>${evidenceHTML}</td>
           <td>${date}</td>
         </tr>
@@ -206,6 +206,7 @@ async function loadReports() {
     });
 
   } catch (e) {
+    console.error(e);
     document.getElementById("reportBody").innerHTML =
       `<tr><td colspan="7" class="no-data">Error loading reports</td></tr>`;
   }

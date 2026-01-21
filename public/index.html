@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fil">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>School Incident Reporting System</title>
+<title>Sistema ng Pag-uulat ng Insidente sa Paaralan</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -12,86 +13,134 @@
 <div class="w-full max-w-2xl bg-white shadow-lg rounded-2xl p-6">
 
   <h2 class="text-2xl font-bold text-center mb-4 text-blue-700">
-    School Incident Reporting Form
+    Form ng Pag-uulat ng Insidente sa Paaralan
   </h2>
 
   <form id="reportForm" enctype="multipart/form-data" class="space-y-4">
 
     <!-- Name -->
     <div>
-      <label class="font-semibold">Your Name (optional)</label>
-      <input type="text" name="name" placeholder="Enter your name (or leave blank)" 
+      <label class="font-semibold">Iyong Pangalan (opsyonal)</label>
+      <input type="text" name="name" placeholder="Ilagay ang iyong pangalan (maaari ring iwanang blangko)" 
         class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
     </div>
 
     <!-- Grade Level -->
     <div>
-      <label class="font-semibold">Grade Level</label>
+      <label class="font-semibold">Antas ng Baitang</label>
       <select name="grade_level" required
         class="w-full p-2 border rounded-lg bg-white focus:ring focus:ring-blue-300">
-        <option value="">Select Grade Level</option>
-        <option value="Grade 7">Grade 7</option>
-        <option value="Grade 8">Grade 8</option>
-        <option value="Grade 9">Grade 9</option>
-        <option value="Grade 10">Grade 10</option>
-        <option value="Grade 11">Grade 11</option>
-        <option value="Grade 12">Grade 12</option>
+        <option value="">Pumili ng Antas ng Baitang</option>
+        <option value="Grade 7">Baitang 7</option>
+        <option value="Grade 8">Baitang 8</option>
+        <option value="Grade 9">Baitang 9</option>
+        <option value="Grade 10">Baitang 10</option>
+        <option value="Grade 11">Baitang 11</option>
+        <option value="Grade 12">Baitang 12</option>
       </select>
     </div>
 
     <!-- Location -->
     <div>
-      <label class="font-semibold">Location of Incident</label>
-      <input type="text" name="location" required placeholder="Ex: Hallway, Canteen, Classroom..."
+      <label class="font-semibold">Lugar ng Insidente</label>
+      <input type="text" name="location" required placeholder="Hal: Pasilyo, Kantina, Silid-aralan..."
         class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
     </div>
 
     <!-- Type of Report -->
     <div>
-      <label class="font-semibold">Type of Report</label>
+      <label class="font-semibold">Uri ng Ulat</label>
       <select name="report_type" id="report_type" required
         class="w-full p-2 border rounded-lg bg-white focus:ring focus:ring-blue-300">
-        <option value="">Select Type of Report</option>
-        <option value="Bullying">Bullying</option>
-        <option value="Harassment">Harassment</option>
-        <option value="Physical Violence">Physical Violence</option>
-        <option value="Theft">Theft</option>
-        <option value="Vandalism">Vandalism</option>
-        <option value="Cyber Incident">Cyber Incident</option>
-        <option value="Student Misconduct">Student Misconduct</option>
-        <option value="Substance Issue">Substance Issue</option>
-        <option value="Emergency or Safety Concern">Emergency or Safety Concern</option>
-        <option value="Other">Other (please specify)</option>
+        <option value="">Pumili ng Uri ng Ulat</option>
+        <option value="Bullying">Pambubully</option>
+        <option value="Harassment">Pangha-harass</option>
+        <option value="Physical Violence">Pisikal na Karahasan</option>
+        <option value="Theft">Pagnanakaw</option>
+        <option value="Vandalism">Paninira ng Ari-arian</option>
+        <option value="Cyber Incident">Insidenteng Online</option>
+        <option value="Student Misconduct">Hindi Angkop na Pag-uugali ng Mag-aaral</option>
+        <option value="Substance Issue">Isyu sa Ipinagbabawal na Gamot</option>
+        <option value="Emergency or Safety Concern">Emerhensiya o Isyu sa Kaligtasan</option>
+        <option value="Other">Iba pa (pakitukoy)</option>
       </select>
     </div>
 
-    <!-- Other type field (hidden) -->
+    <!-- Other type field -->
     <div id="otherField" class="hidden">
-      <label class="font-semibold">Please specify</label>
-      <input type="text" id="otherInput" placeholder="Describe the type"
+      <label class="font-semibold">Pakilagay ang detalye</label>
+      <input type="text" id="otherInput" placeholder="Ilarawan ang uri ng insidente"
         class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
     </div>
 
-    <!-- Description -->
-    <div>
-      <label class="font-semibold">Description</label>
-      <textarea name="description" required rows="4"
-        placeholder="Describe what happened..."
-        class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300"></textarea>
-    </div>
+   <!-- Description -->
+<div>
+  <label class="font-semibold">Paglalarawan ng Pangyayari</label>
+  <p class="text-sm text-gray-600 mb-2">
+    Sagutin ang bawat tanong sa pamamagitan ng pag-click sa bawat tanong.
+  </p>
+
+  <div class="space-y-2">
+
+    <details class="border rounded-lg p-2 bg-gray-50">
+      <summary class="font-semibold cursor-pointer">Sino ang sangkot? ↓</summary>
+      <input type="text" id="desc_sino" 
+        class="w-full mt-2 p-2 border rounded-lg focus:ring focus:ring-blue-300"
+        placeholder="Hal: Pangalan ng mag-aaral o Kung sino man">
+    </details>
+
+    <details class="border rounded-lg p-2 bg-gray-50">
+      <summary class="font-semibold cursor-pointer">Ano ang nangyari? ↓</summary>
+      <textarea id="desc_ano" rows="3"
+        class="w-full mt-2 p-2 border rounded-lg focus:ring focus:ring-blue-300"
+        placeholder="Ilarawan ang nangyari"></textarea>
+    </details>
+
+    <details class="border rounded-lg p-2 bg-gray-50">
+      <summary class="font-semibold cursor-pointer">Kailan ito nangyari? ↓</summary>
+      <input type="text" id="desc_kailan" 
+        class="w-full mt-2 p-2 border rounded-lg focus:ring focus:ring-blue-300"
+        placeholder="Petsa at oras">
+    </details>
+
+    <details class="border rounded-lg p-2 bg-gray-50">
+      <summary class="font-semibold cursor-pointer">Bakit ito nangyari? (kung alam mo) ↓</summary>
+      <textarea id="desc_bakit" rows="2"
+        class="w-full mt-2 p-2 border rounded-lg focus:ring focus:ring-blue-300"
+        placeholder="Posibleng dahilan"></textarea>
+    </details>
+
+    <details class="border rounded-lg p-2 bg-gray-50">
+      <summary class="font-semibold cursor-pointer">Paano ito nangyari? ↓</summary>
+      <textarea id="desc_paano" rows="3"
+        class="w-full mt-2 p-2 border rounded-lg focus:ring focus:ring-blue-300"
+        placeholder="Paano nagsimula ang insidente"></textarea>
+    </details>
+
+  </div>
+
+  <!-- Hidden combined description -->
+  <input type="hidden" name="description" id="finalDescription">
+</div>
+
+
+
+
 
     <!-- File upload -->
     <div>
-      <label class="font-semibold">Upload Evidence (images/videos)</label>
+      <label class="font-semibold">Mag-upload ng Ebidensya (larawan o bidyo)</label>
       <input type="file" name="media" multiple
         class="w-full p-2 border rounded-lg bg-white focus:ring focus:ring-blue-300">
-      <p class="text-sm text-gray-500 mt-1">You may upload photos or videos.</p>
+      <p class="text-sm text-gray-500 mt-1">
+        Maaari kang mag-upload ng mga larawan o bidyo.
+      </p>
     </div>
 
     <!-- Submit -->
     <button type="submit"
       class="w-full bg-blue-600 text-white py-2 rounded-lg text-lg font-semibold hover:bg-blue-700">
-      Submit Report
+      Isumite ang Ulat
     </button>
 
     <!-- Status -->
@@ -101,7 +150,6 @@
 </div>
 
 <script>
-  // Show "Other" input if selected
   document.getElementById("report_type").addEventListener("change", function () {
     if (this.value === "Other") {
       document.getElementById("otherField").classList.remove("hidden");
@@ -111,19 +159,17 @@
     }
   });
 
-  // Submit form
   document.getElementById("reportForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const form = new FormData(this);
     const status = document.getElementById("status");
 
-    // If Other is used, override the report_type
     if (form.get("report_type") === "Other") {
       form.set("report_type", document.getElementById("otherInput").value.trim());
     }
 
-    status.textContent = "Submitting...";
+    status.textContent = "Isinusumite...";
 
     try {
       const response = await fetch("/api/report", {
@@ -134,16 +180,16 @@
       const result = await response.json();
 
       if (result.success) {
-        status.textContent = "Report submitted successfully!";
+        status.textContent = "Matagumpay na naisumite ang ulat!";
         status.className = "text-green-600 text-center font-semibold";
         this.reset();
         document.getElementById("otherField").classList.add("hidden");
       } else {
-        status.textContent = "Failed to submit report.";
+        status.textContent = "Hindi naisumite ang ulat.";
         status.className = "text-red-600 text-center font-semibold";
       }
     } catch (err) {
-      status.textContent = "An error occurred. Please try again.";
+      status.textContent = "May naganap na error. Pakisubukang muli.";
       status.className = "text-red-600 text-center font-semibold";
     }
   });

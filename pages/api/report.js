@@ -1,59 +1,106 @@
-import { createClient } from "@supabase/supabase-js";
+// pages/api/report.js
 import { IncomingForm } from "formidable";
 import fs from "fs";
+import { createClient } from "@supabase/supabase-js";
 
-export const config = { api: { bodyParser: false } };
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE
+);
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
-  const form = new IncomingForm({ multiples: true });
+  const form = new IncomingForm({
+    multiples: true,
+    keepExtensions: true,
+  });
 
   form.parse(req, async (err, fields, files) => {
-    if (err) return res.status(500).json({ error: "Form parsing failed" });
+    if (err) {
+      console.error("Form parse error:", err);
+      return res.status(500).json({ error: "Form error" });
+    }
 
     try {
-      const SUPABASE_URL = process.env.SUPABASE_URL;
-      const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
+      // 🔹 Combine description fields
+      const description = `
+Sino ang sangkot:
+${fields.desc_sino || ""}
 
-      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE);
+Ano ang nangyari:
+${fields.desc_ano || ""}
 
-      const mediaUrls = [];
+Saan ito nangyari:
+${fields.desc_saan || ""}
+
+Kailan ito nangyari:
+${fields.desc_kailan || ""}
+
+Bakit ito nangyari:
+${fields.desc_bakit || ""}
+
+Paano ito nangyari:
+${fields.desc_paano || ""}
+      `.trim();
+
+      // 🔹 Upload evidence (optional)
+      let fileUrl = null;
 
       if (files.media) {
-        const fileList = Array.isArray(files.media) ? files.media : [files.media];
+        const file = Array.isArray(files.media)
+          ? files.media[0]
+          : files.media;
 
-        for (const file of fileList) {
-          const buffer = fs.readFileSync(file.filepath);
-          const safeName = file.originalFilename.replace(/\s+/g, "_");
-          const dest = `${Date.now()}-${Math.round(Math.random()*10000)}-${safeName}`;
+        const fileExt = file.originalFilename?.split(".").pop();
+        const filePath = `evidence/${Date.now()}-${file.originalFilename}`;
 
-          const { error: uploadError } = await supabase.storage
+        const fileBuffer = fs.readFileSync(file.filepath);
+
+        const { error: uploadError } = await supabase.storage
+          .from("evidence")
+          .upload(filePath, fileBuffer, {
+            contentType: file.mimetype,
+          });
+
+        if (!uploadError) {
+          const { data } = supabase.storage
             .from("evidence")
-            .upload(dest, buffer, { contentType: file.mimetype });
+            .getPublicUrl(filePath);
 
-          if (!uploadError) {
-            const { data } = supabase.storage.from("evidence").getPublicUrl(dest);
-            mediaUrls.push(data.publicUrl);
-          }
+          fileUrl = data.publicUrl;
         }
       }
 
-      const { error: insertError } = await supabase.from("reports").insert([{
-        name: fields.name || null,
-        grade_level: fields.grade_level || null,
-        location: fields.location || null,
-        report_type: fields.report_type || null,
-        description: fields.description || null,
-        media_urls: mediaUrls,
-      }]);
+      // 🔹 Insert report into database
+      const { error: insertError } = await supabase.from("reports").insert([
+        {
+          name: fields.name || "Anonymous",
+          grade: fields.grade_level,
+          reportType: fields.report_type,
+          location: fields.location,
+          message: description,
+          fileUrl: fileUrl,
+        },
+      ]);
 
-      if (insertError) return res.status(500).json({ error: "Database insert failed" });
+      if (insertError) {
+        console.error("Insert error:", insertError);
+        return res.status(500).json({ error: "Database error" });
+      }
 
       return res.status(200).json({ success: true });
 
-    } catch (error) {
-      console.error("SERVER ERROR:", error);
+    } catch (e) {
+      console.error("SERVER ERROR:", e);
       return res.status(500).json({ error: "Server error" });
     }
   });
