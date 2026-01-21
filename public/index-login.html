@@ -1,15 +1,121 @@
-<h2>Mag-login gamit ang LRN</h2>
-<form id="loginForm">
-  <input type="text" name="lrn" placeholder="Ilagay ang iyong LRN" required>
-  <input type="password" name="password" placeholder="Password (optional)">
-  <button type="submit">Mag-login</button>
-  <p id="status"></p>
-</form>
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Login</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login-box {
+    background: white;
+    width: 100%;
+    max-width: 420px;
+    padding: 36px 32px;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  }
+
+  .login-box h2 {
+    text-align: center;
+    color: #1e40af;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 26px;
+  }
+
+  .login-box input {
+    width: 100%;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    border-radius: 14px;
+    border: 2px solid #cbd5e1;
+    font-size: 15px;
+    background: #ffffff;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+
+  .login-box input::placeholder {
+    color: #6b7280;
+  }
+
+  .login-box input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+  }
+
+  .login-box button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 6px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .login-box button:hover {
+    background: #1d4ed8;
+  }
+
+  #status {
+    text-align: center;
+    font-weight: 600;
+    margin-top: 12px;
+    font-size: 14px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <h2>Mag-login gamit ang LRN</h2>
+
+  <form id="loginForm">
+    <input
+      type="text"
+      name="lrn"
+      placeholder="Ilagay ang iyong 12-digit LRN"
+      inputmode="numeric"
+      maxlength="12"
+      required
+    >
+
+    <input
+      type="password"
+      name="password"
+      placeholder="Password (optional)"
+    >
+
+    <button type="submit">Mag-login</button>
+
+    <p id="status"></p>
+  </form>
+</div>
 
 <script>
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const form = new FormData(e.target);
+  const status = document.getElementById("status");
+  status.textContent = "Naglo-login...";
+
   const res = await fetch("/api/student/login", {
     method: "POST",
     body: JSON.stringify({
@@ -18,15 +124,19 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     }),
     headers: { "Content-Type": "application/json" }
   });
+
   const result = await res.json();
-  const status = document.getElementById("status");
 
   if (result.success) {
+    status.style.color = "#16a34a";
     status.textContent = "Matagumpay na naka-login!";
-    // Redirect to the report form page
     window.location.href = "/index.html";
   } else {
-    status.textContent = result.error;
+    status.style.color = "#dc2626";
+    status.textContent = result.error || "Hindi tama ang LRN.";
   }
 });
 </script>
+
+</body>
+</html>
