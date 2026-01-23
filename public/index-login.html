@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Login</title>
-
 <style>
   body {
     margin: 0;
@@ -15,7 +14,6 @@
     justify-content: center;
     align-items: center;
   }
-
   .login-box {
     background: white;
     width: 100%;
@@ -24,7 +22,6 @@
     border-radius: 24px;
     box-shadow: 0 12px 30px rgba(0,0,0,0.15);
   }
-
   .login-box h2 {
     text-align: center;
     color: #1e40af;
@@ -32,7 +29,6 @@
     font-weight: 700;
     margin-bottom: 26px;
   }
-
   .login-box input {
     width: 100%;
     padding: 14px 16px;
@@ -41,19 +37,7 @@
     border: 2px solid #cbd5e1;
     font-size: 15px;
     background: #ffffff;
-    transition: border 0.2s, box-shadow 0.2s;
   }
-
-  .login-box input::placeholder {
-    color: #6b7280;
-  }
-
-  .login-box input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
-  }
-
   .login-box button {
     width: 100%;
     padding: 14px;
@@ -65,13 +49,7 @@
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
   }
-
-  .login-box button:hover {
-    background: #1d4ed8;
-  }
-
   #status {
     text-align: center;
     font-weight: 600;
@@ -95,47 +73,58 @@
       maxlength="12"
       required
     >
-
     <input
       type="password"
       name="password"
       placeholder="Password (optional)"
     >
-
     <button type="submit">Mag-login</button>
-
     <p id="status"></p>
   </form>
 </div>
 
 <script>
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const form = new FormData(e.target);
-  const status = document.getElementById("status");
-  status.textContent = "Naglo-login...";
-
-  const res = await fetch("/api/student/login", {
-    method: "POST",
-    body: JSON.stringify({
-      lrn: form.get("lrn"),
-      password: form.get("password")
-    }),
-    headers: { "Content-Type": "application/json" }
-  });
-
-  const result = await res.json();
-
-  if (result.success) {
-    status.style.color = "#16a34a";
-    status.textContent = "Matagumpay na naka-login!";
-    window.location.href = "/index.html";
-  } else {
-    status.style.color = "#dc2626";
-    status.textContent = result.error || "Hindi tama ang LRN.";
+  // Redirect logged-in users automatically
+  const student = JSON.parse(localStorage.getItem('student'));
+  if (student) {
+    window.location.replace('/index.html');
   }
-});
+
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const lrn = document.querySelector('input[name="lrn"]').value;
+    const password = document.querySelector('input[name="password"]').value;
+    const status = document.getElementById("status");
+
+    status.textContent = "Logging in...";
+
+    try {
+      const res = await fetch("/api/student/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lrn, password })
+      });
+
+      const result = await res.json();
+      console.log(result); // debug
+
+      if (res.ok && result.success) {
+        // Save student info to localStorage
+        localStorage.setItem("student", JSON.stringify(result.student));
+        status.textContent = "Login successful!";
+        status.style.color = "green";
+        window.location.replace("/index.html");
+      } else {
+        status.textContent = result.error || "Login failed";
+        status.style.color = "red";
+      }
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Network error";
+      status.style.color = "red";
+    }
+  });
 </script>
 
 </body>

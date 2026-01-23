@@ -16,6 +16,9 @@
     Form ng Pag-uulat ng Insidente sa Paaralan
   </h2>
 
+  <!-- Optional: Show logged-in student name -->
+  <p id="studentName" class="text-center font-semibold text-gray-700 mb-4"></p>
+
   <form id="reportForm" enctype="multipart/form-data" class="space-y-4">
 
     <!-- Name -->
@@ -123,42 +126,61 @@
   <input type="hidden" name="description" id="finalDescription">
 </div>
 
+<!-- File upload -->
+<div>
+  <label class="font-semibold">Mag-upload ng Ebidensya (larawan o bidyo)</label>
+  <input type="file" name="media" multiple
+    class="w-full p-2 border rounded-lg bg-white focus:ring focus:ring-blue-300">
+  <p class="text-sm text-gray-500 mt-1">
+    Maaari kang mag-upload ng mga larawan o bidyo.
+  </p>
+</div>
 
+<!-- Submit -->
+<button type="submit"
+  class="w-full bg-blue-600 text-white py-2 rounded-lg text-lg font-semibold hover:bg-blue-700">
+  Isumite ang Ulat
+</button>
 
+<!-- Status -->
+<p id="status" class="text-center font-semibold mt-2"></p>
 
+<!-- Logout -->
+<button id="logoutBtn" class="mt-4 w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">
+  Logout
+</button>
 
-    <!-- File upload -->
-    <div>
-      <label class="font-semibold">Mag-upload ng Ebidensya (larawan o bidyo)</label>
-      <input type="file" name="media" multiple
-        class="w-full p-2 border rounded-lg bg-white focus:ring focus:ring-blue-300">
-      <p class="text-sm text-gray-500 mt-1">
-        Maaari kang mag-upload ng mga larawan o bidyo.
-      </p>
-    </div>
-
-    <!-- Submit -->
-    <button type="submit"
-      class="w-full bg-blue-600 text-white py-2 rounded-lg text-lg font-semibold hover:bg-blue-700">
-      Isumite ang Ulat
-    </button>
-
-    <!-- Status -->
-    <p id="status" class="text-center font-semibold mt-2"></p>
-
-  </form>
 </div>
 
 <script>
+  // --- Check login ---
+  const student = JSON.parse(localStorage.getItem('student'));
+  if (!student) {
+    window.location.href = "/index-login.html";
+  } else {
+    // Show student name at top
+    const studentName = document.getElementById('studentName');
+    studentName.textContent = `Logged in as: ${student.name || student.lrn}`;
+  }
+
+  // --- Logout ---
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("student");
+    window.location.replace("/index-login.html");
+  });
+
+  // --- Show/hide "Other" field ---
   document.getElementById("report_type").addEventListener("change", function () {
+    const otherField = document.getElementById("otherField");
     if (this.value === "Other") {
-      document.getElementById("otherField").classList.remove("hidden");
+      otherField.classList.remove("hidden");
     } else {
-      document.getElementById("otherField").classList.add("hidden");
+      otherField.classList.add("hidden");
       document.getElementById("otherInput").value = "";
     }
   });
 
+  // --- Submit report ---
   document.getElementById("reportForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -170,11 +192,12 @@
     }
 
     status.textContent = "Isinusumite...";
+    status.className = "text-center font-semibold";
 
     try {
       const response = await fetch("/api/report", {
         method: "POST",
-        body: form,
+        body: form
       });
 
       const result = await response.json();
@@ -189,17 +212,11 @@
         status.className = "text-red-600 text-center font-semibold";
       }
     } catch (err) {
+      console.error(err);
       status.textContent = "May naganap na error. Pakisubukang muli.";
       status.className = "text-red-600 text-center font-semibold";
     }
   });
-
-  // Check if student_token exists
-const token = document.cookie.split('; ').find(row => row.startsWith('student_token='));
-if (!token) {
-  window.location.href = "/index-login.html"; // redirect to login
-}
-
 </script>
 
 </body>
