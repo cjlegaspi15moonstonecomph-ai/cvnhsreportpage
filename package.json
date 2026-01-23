@@ -1,0 +1,7 @@
+{
+  "name": "school-report-system",
+  "version": "1.0.0",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.35.0"
+  }
+}
