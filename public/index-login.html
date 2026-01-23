@@ -84,7 +84,7 @@
 </div>
 
 <script>
-  // Redirect logged-in users automatically
+  // Redirect already logged-in students automatically
   const student = JSON.parse(localStorage.getItem('student'));
   if (student) {
     window.location.replace('/index.html');
@@ -93,27 +93,34 @@
   document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const lrn = document.querySelector('input[name="lrn"]').value;
-    const password = document.querySelector('input[name="password"]').value;
+    const lrn = document.querySelector('input[name="lrn"]').value.trim();
+    const password = document.querySelector('input[name="password"]').value; // optional
     const status = document.getElementById("status");
 
     status.textContent = "Logging in...";
+    status.style.color = "black";
 
     try {
+      // 🔹 Call your Vercel serverless function
+      // If frontend and backend are in the same Vercel project, this URL works:
       const res = await fetch("/api/student/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lrn, password })
+        body: JSON.stringify({ lrn }) // password optional
       });
 
+      // Parse the response
       const result = await res.json();
-      console.log(result); // debug
+      console.log(result);
 
       if (res.ok && result.success) {
-        // Save student info to localStorage
+        // ✅ Save student info to localStorage
         localStorage.setItem("student", JSON.stringify(result.student));
+
         status.textContent = "Login successful!";
         status.style.color = "green";
+
+        // Redirect to index page
         window.location.replace("/index.html");
       } else {
         status.textContent = result.error || "Login failed";
@@ -121,11 +128,12 @@
       }
     } catch (err) {
       console.error(err);
-      status.textContent = "Network error";
+      status.textContent = "Network error — cannot reach server";
       status.style.color = "red";
     }
   });
 </script>
+
 
 </body>
 </html>
