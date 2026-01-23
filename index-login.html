@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Login</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    body { margin: 0; font-family: "Segoe UI"; background: linear-gradient(135deg,#dbeafe,#bfdbfe); min-height:100vh; display:flex; justify-content:center; align-items:center;}
+    .login-box { background:white; width:100%; max-width:420px; padding:36px 32px; border-radius:24px; box-shadow:0 12px 30px rgba(0,0,0,0.15);}
+    .login-box h2 { text-align:center; color:#1e40af; font-size:22px; font-weight:700; margin-bottom:26px; }
+    .login-box input { width:100%; padding:14px 16px; margin-bottom:14px; border-radius:14px; border:2px solid #cbd5e1; font-size:15px; background:#fff; transition: border 0.2s, box-shadow 0.2s;}
+    .login-box input:focus { outline:none; border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,0.25);}
+    .login-box button { width:100%; padding:14px; margin-top:6px; background:#2563eb; color:white; border:none; border-radius:14px; font-size:16px; font-weight:600; cursor:pointer; transition:background 0.2s;}
+    .login-box button:hover { background:#1d4ed8; }
+    #status { text-align:center; font-weight:600; margin-top:12px; font-size:14px; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Mag-login gamit ang LRN</h2>
+    <form id="loginForm">
+      <input type="text" name="lrn" placeholder="Ilagay ang iyong 12-digit LRN" inputmode="numeric" maxlength="12" required>
+      <input type="password" name="password" placeholder="Password (optional)">
+      <button type="submit">Mag-login</button>
+      <p id="status"></p>
+    </form>
+  </div>
+
+  <script>
+    // Redirect already logged-in students
+    const student = JSON.parse(localStorage.getItem('student'));
+    if (student) window.location.replace('/index.html');
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const lrn = document.querySelector('input[name="lrn"]').value.trim();
+      const status = document.getElementById("status");
+      status.textContent = "Logging in...";
+      status.style.color = "black";
+
+      try {
+        const res = await fetch("/api/student/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lrn })
+        });
+
+        const result = await res.json();
+        console.log(result);
+
+        if (res.ok && result.success) {
+          localStorage.setItem("student", JSON.stringify(result.student));
+          status.textContent = "Login successful!";
+          status.style.color = "green";
+          window.location.replace("/index.html");
+        } else {
+          status.textContent = result.error || "Login failed";
+          status.style.color = "red";
+        }
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Network error — cannot reach server";
+        status.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
