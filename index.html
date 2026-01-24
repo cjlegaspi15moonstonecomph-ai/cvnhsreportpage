@@ -1,171 +1,218 @@
 <!DOCTYPE html>
 <html lang="fil">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pag-uulat ng Insidente</title>
-  <link rel="icon" href="favicon.ico">
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sistema ng Pag-uulat ng Insidente sa Paaralan</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center p-4">
+<body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-blue-200 flex justify-center items-center p-4">
 
-  <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6">
+<div class="w-full max-w-2xl bg-white/90 backdrop-blur-xl shadow-2xl rounded-3xl p-8">
 
-    <!-- Title -->
-    <h1 class="text-2xl font-bold text-center text-blue-700 mb-2">
-      Pag-uulat ng Insidente
-    </h1>
+  <h2 class="text-2xl font-extrabold text-center mb-2 text-blue-700">
+    Pag-uulat ng Insidente
+  </h2>
 
-    <!-- Student info -->
-    <p id="studentName" class="text-center text-sm font-semibold text-gray-600 mb-4"></p>
+  <p class="text-center text-sm text-gray-600 mb-6">
+    Sistema ng Pag-uulat ng Insidente sa Paaralan
+  </p>
 
-    <!-- FORM -->
-    <form id="reportForm" class="space-y-4" enctype="multipart/form-data">
+  <!-- Student name -->
+  <p id="studentName" class="text-center font-semibold text-gray-700 mb-6"></p>
 
-      <!-- Name -->
-      <div>
-        <label class="font-semibold">Iyong Pangalan (Opsyonal)</label>
-        <input type="text" name="name"
-          class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-400">
+  <form id="reportForm" enctype="multipart/form-data" class="space-y-5">
+
+    <!-- Name -->
+    <div>
+      <label class="font-semibold text-gray-700">Iyong Pangalan (opsyonal)</label>
+      <input type="text" name="name"
+        placeholder="Ilagay ang iyong pangalan"
+        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-200 focus:border-blue-500">
+    </div>
+
+    <!-- Grade -->
+    <div>
+      <label class="font-semibold text-gray-700">Antas ng Baitang</label>
+      <select name="grade_level" required
+        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-4 focus:ring-blue-200 focus:border-blue-500">
+        <option value="">Pumili</option>
+        <option value="Grade 7">Baitang 7</option>
+        <option value="Grade 8">Baitang 8</option>
+        <option value="Grade 9">Baitang 9</option>
+        <option value="Grade 10">Baitang 10</option>
+        <option value="Grade 11">Baitang 11</option>
+        <option value="Grade 12">Baitang 12</option>
+      </select>
+    </div>
+
+    <!-- Location -->
+    <div>
+      <label class="font-semibold text-gray-700">Lugar ng Insidente</label>
+      <input type="text" name="location" required
+        placeholder="Hal: Pasilyo, Kantina, Silid-aralan"
+        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-200 focus:border-blue-500">
+    </div>
+
+    <!-- Type -->
+    <div>
+      <label class="font-semibold text-gray-700">Uri ng Ulat</label>
+      <select name="report_type" id="report_type" required
+        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-4 focus:ring-blue-200 focus:border-blue-500">
+        <option value="">Pumili</option>
+        <option value="Bullying">Pambubully</option>
+        <option value="Harassment">Pangha-harass</option>
+        <option value="Physical Violence">Pisikal na Karahasan</option>
+        <option value="Theft">Pagnanakaw</option>
+        <option value="Vandalism">Paninira ng Ari-arian</option>
+        <option value="Cyber Incident">Insidenteng Online</option>
+        <option value="Student Misconduct">Hindi Angkop na Pag-uugali</option>
+        <option value="Substance Issue">Isyu sa Gamot</option>
+        <option value="Emergency or Safety Concern">Emerhensiya</option>
+        <option value="Other">Iba pa</option>
+      </select>
+    </div>
+
+    <!-- Other -->
+    <div id="otherField" class="hidden">
+      <label class="font-semibold text-gray-700">Pakilagay ang detalye</label>
+      <input type="text" id="otherInput"
+        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-200 focus:border-blue-500">
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="font-semibold text-gray-700">Paglalarawan ng Pangyayari</label>
+      <p class="text-sm text-gray-500 mb-2">
+        Sagutin ang bawat tanong sa pamamagitan ng pag-click.
+      </p>
+
+      <div class="space-y-3">
+
+        <details class="rounded-xl border bg-gray-50 p-3">
+          <summary class="font-semibold cursor-pointer">Sino ang sangkot?</summary>
+          <input id="desc_sino" class="w-full mt-2 px-3 py-2 rounded-lg border">
+        </details>
+
+        <details class="rounded-xl border bg-gray-50 p-3">
+          <summary class="font-semibold cursor-pointer">Ano ang nangyari?</summary>
+          <textarea id="desc_ano" rows="3" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
+        </details>
+
+        <details class="rounded-xl border bg-gray-50 p-3">
+          <summary class="font-semibold cursor-pointer">Kailan ito nangyari?</summary>
+          <input id="desc_kailan" class="w-full mt-2 px-3 py-2 rounded-lg border">
+        </details>
+
+        <details class="rounded-xl border bg-gray-50 p-3">
+          <summary class="font-semibold cursor-pointer">Bakit ito nangyari?</summary>
+          <textarea id="desc_bakit" rows="2" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
+        </details>
+
+        <details class="rounded-xl border bg-gray-50 p-3">
+          <summary class="font-semibold cursor-pointer">Paano ito nangyari?</summary>
+          <textarea id="desc_paano" rows="3" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
+        </details>
+
       </div>
 
-      <!-- Grade -->
-      <div>
-        <label class="font-semibold">Antas ng Baitang</label>
-        <select name="grade_level" required
-          class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-400">
-          <option value="">Pumili</option>
-          <option>Grade 7</option>
-          <option>Grade 8</option>
-          <option>Grade 9</option>
-          <option>Grade 10</option>
-          <option>Grade 11</option>
-          <option>Grade 12</option>
-        </select>
-      </div>
+      <input type="hidden" name="description" id="finalDescription">
+    </div>
 
-      <!-- Location -->
-      <div>
-        <label class="font-semibold">Lugar ng Insidente</label>
-        <input type="text" name="location" required
-          class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-400">
-      </div>
+    <!-- Upload -->
+    <div>
+      <label class="font-semibold text-gray-700">Ebidensya</label>
+      <input type="file" name="media" multiple
+        class="w-full mt-1 p-2 rounded-xl border bg-white">
+    </div>
 
-      <!-- Type -->
-      <div>
-        <label class="font-semibold">Uri ng Insidente</label>
-        <select name="report_type" id="report_type" required
-          class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-400">
-          <option value="">Pumili</option>
-          <option>Bullying</option>
-          <option>Harassment</option>
-          <option>Physical Violence</option>
-          <option>Theft</option>
-          <option>Vandalism</option>
-          <option>Cyber Incident</option>
-          <option>Other</option>
-        </select>
-      </div>
+    <!-- Submit -->
+    <button type="submit"
+      class="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-3 rounded-xl font-bold text-lg shadow-lg">
+      Isumite ang Ulat
+    </button>
 
-      <!-- Other -->
-      <div id="otherField" class="hidden">
-        <label class="font-semibold">Iba pa (Ilarawan)</label>
-        <input type="text" id="otherInput"
-          class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-400">
-      </div>
-
-      <!-- Description -->
-      <div>
-        <label class="font-semibold">Paglalarawan</label>
-        <textarea name="description" rows="4" required
-          class="w-full mt-1 p-3 border rounded-xl focus:ring-2 focus:ring-blue-400"
-          placeholder="Ilarawan ang nangyari..."></textarea>
-      </div>
-
-      <!-- Evidence -->
-      <div>
-        <label class="font-semibold">Ebidensya (Larawan / Video)</label>
-        <input type="file" name="media" multiple
-          class="w-full mt-1 p-2 border rounded-xl">
-      </div>
-
-      <!-- Submit -->
-      <button type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition">
-        Isumite ang Ulat
-      </button>
-
-      <!-- Status -->
-      <p id="status" class="text-center font-semibold"></p>
-
-    </form>
+    <p id="status" class="text-center font-semibold"></p>
 
     <!-- Logout -->
     <button id="logoutBtn"
-      class="mt-4 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl">
+      class="w-full mt-3 bg-red-500 hover:bg-red-600 transition text-white py-2 rounded-xl font-semibold">
       Logout
     </button>
 
-  </div>
+  </form>
 
+</div>
+
+<!-- 🔴 JS UNCHANGED -->
 <script>
-  // --- Check login ---
-  const student = JSON.parse(localStorage.getItem("student"));
-  if (!student) {
-    window.location.replace("/index-login.html");
-  } else {
-    document.getElementById("studentName").textContent =
-      "Logged in as: " + (student.name || student.lrn);
+    // Check if student is logged in
+const student = JSON.parse(localStorage.getItem('student'));
+if (!student) {
+  window.location.href = "/index-login.html"; // redirect if not logged in
+}
+else {
+    // Show student name at top
+    const studentName = document.getElementById('studentName');
+    studentName.textContent = `Logged in as: ${student.name || student.lrn}`;
   }
 
   // --- Logout ---
-  document.getElementById("logoutBtn").onclick = () => {
+  document.getElementById("logoutBtn").addEventListener("click", () => {
     localStorage.removeItem("student");
     window.location.replace("/index-login.html");
-  };
+  });
 
-  // --- Other type toggle ---
-  document.getElementById("report_type").onchange = function () {
-    document.getElementById("otherField")
-      .classList.toggle("hidden", this.value !== "Other");
-  };
+  // --- Show/hide "Other" field ---
+  document.getElementById("report_type").addEventListener("change", function () {
+    const otherField = document.getElementById("otherField");
+    if (this.value === "Other") {
+      otherField.classList.remove("hidden");
+    } else {
+      otherField.classList.add("hidden");
+      document.getElementById("otherInput").value = "";
+    }
+  });
 
-  // --- Submit ---
-  document.getElementById("reportForm").onsubmit = async function (e) {
+  // --- Submit report ---
+  document.getElementById("reportForm").addEventListener("submit", async function (e) {
     e.preventDefault();
-    const status = document.getElementById("status");
-    const formData = new FormData(this);
 
-    if (formData.get("report_type") === "Other") {
-      formData.set("report_type",
-        document.getElementById("otherInput").value.trim());
+    const form = new FormData(this);
+    const status = document.getElementById("status");
+
+    if (form.get("report_type") === "Other") {
+      form.set("report_type", document.getElementById("otherInput").value.trim());
     }
 
     status.textContent = "Isinusumite...";
-    status.className = "text-blue-600 text-center";
+    status.className = "text-center font-semibold";
 
     try {
-      const res = await fetch("/api/report", {
+      const response = await fetch("/api/report", {
         method: "POST",
-        body: formData
+        body: form
       });
 
-      const result = await res.json();
+      const result = await response.json();
 
       if (result.success) {
-        status.textContent = "Matagumpay na naisumite!";
-        status.className = "text-green-600 text-center";
+        status.textContent = "Matagumpay na naisumite ang ulat!";
+        status.className = "text-green-600 text-center font-semibold";
         this.reset();
         document.getElementById("otherField").classList.add("hidden");
       } else {
-        throw new Error();
+        status.textContent = "Hindi naisumite ang ulat.";
+        status.className = "text-red-600 text-center font-semibold";
       }
-    } catch {
-      status.textContent = "Error sa pagsumite.";
-      status.className = "text-red-600 text-center";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "May naganap na error. Pakisubukang muli.";
+      status.className = "text-red-600 text-center font-semibold";
     }
-  };
+  });
 </script>
 
 </body>
