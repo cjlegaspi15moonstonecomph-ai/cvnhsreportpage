@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sistema ng Pag-uulat ng Insidente sa Paaralan</title>
+<title>CVNHS Report Page</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -17,7 +17,7 @@
   </h2>
 
   <p class="text-center text-sm text-gray-600 mb-6">
-    Sistema ng Pag-uulat ng Insidente sa Paaralan
+    School Incident Reporting System
   </p>
 
   <!-- Student name -->
@@ -35,16 +35,16 @@
 
     <!-- Grade -->
     <div>
-      <label class="font-semibold text-gray-700">Antas ng Baitang</label>
+      <label class="font-semibold text-gray-700">Grade Level</label>
       <select name="grade_level" required
         class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-4 focus:ring-blue-200 focus:border-blue-500">
         <option value="">Pumili</option>
-        <option value="Grade 7">Baitang 7</option>
-        <option value="Grade 8">Baitang 8</option>
-        <option value="Grade 9">Baitang 9</option>
-        <option value="Grade 10">Baitang 10</option>
-        <option value="Grade 11">Baitang 11</option>
-        <option value="Grade 12">Baitang 12</option>
+        <option value="Grade 7">Grade 7</option>
+        <option value="Grade 8">Grade 8</option>
+        <option value="Grade 9">Grade 9</option>
+        <option value="Grade 10">Grade 10</option>
+        <option value="Grade 11">Grade 11</option>
+        <option value="Grade 12">Grade 12</option>
       </select>
     </div>
 
@@ -58,35 +58,35 @@
 
     <!-- Type -->
     <div>
-      <label class="font-semibold text-gray-700">Uri ng Ulat</label>
+      <label class="font-semibold text-gray-700">Report Type</label>
       <select name="report_type" id="report_type" required
         class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-4 focus:ring-blue-200 focus:border-blue-500">
-        <option value="">Pumili</option>
-        <option value="Bullying">Pambubully</option>
-        <option value="Harassment">Pangha-harass</option>
-        <option value="Physical Violence">Pisikal na Karahasan</option>
-        <option value="Theft">Pagnanakaw</option>
-        <option value="Vandalism">Paninira ng Ari-arian</option>
-        <option value="Cyber Incident">Insidenteng Online</option>
-        <option value="Student Misconduct">Hindi Angkop na Pag-uugali</option>
-        <option value="Substance Issue">Isyu sa Gamot</option>
-        <option value="Emergency or Safety Concern">Emerhensiya</option>
-        <option value="Other">Iba pa</option>
+        <option value="">Choose</option>
+        <option value="Bullying">Bullying</option>
+        <option value="Harassment">Harassment</option>
+        <option value="Physical Violence">Physical Violence</option>
+        <option value="Theft">Theft</option>
+        <option value="Vandalism">Vandalism</option>
+        <option value="Cyber Incident">Cyber Incident</option>
+        <option value="Student Misconduct">Student Misconduct</option>
+        <option value="Substance Issue">Substance Issue</option>
+        <option value="Emergency or Safety Concern">Emergency or Safety Concern</option>
+        <option value="Other">Other</option>
       </select>
     </div>
 
     <!-- Other -->
     <div id="otherField" class="hidden">
-      <label class="font-semibold text-gray-700">Pakilagay ang detalye</label>
+      <label class="font-semibold text-gray-700">Please Specify</label>
       <input type="text" id="otherInput"
         class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-200 focus:border-blue-500">
     </div>
 
     <!-- Description -->
     <div>
-      <label class="font-semibold text-gray-700">Paglalarawan ng Pangyayari</label>
+      <label class="font-semibold text-gray-700">Description</label>
       <p class="text-sm text-gray-500 mb-2">
-        Sagutin ang bawat tanong sa pamamagitan ng pag-click.
+        Sagutin ang bawat tanong.
       </p>
 
       <div class="space-y-3">
@@ -123,7 +123,7 @@
 
     <!-- Upload -->
     <div>
-      <label class="font-semibold text-gray-700">Ebidensya</label>
+      <label class="font-semibold text-gray-700">Evidence</label>
       <input type="file" name="media" multiple
         class="w-full mt-1 p-2 rounded-xl border bg-white">
     </div>
@@ -131,7 +131,7 @@
     <!-- Submit -->
     <button type="submit"
       class="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-3 rounded-xl font-bold text-lg shadow-lg">
-      Isumite ang Ulat
+      Submit Report
     </button>
 
     <p id="status" class="text-center font-semibold"></p>
