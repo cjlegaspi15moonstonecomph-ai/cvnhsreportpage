@@ -1,6 +1,31 @@
-<input type="email" id="email" placeholder="Admin Gmail" />
-<button onclick="sendOTP()">Send OTP</button>
-<p id="status"></p>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 p-4">
+
+  <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-8">
+    <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">
+      Admin Login
+    </h2>
+
+    <p class="text-center text-sm text-gray-600 mb-4">
+      Mag-sign in gamit ang inyong Gmail. Isang OTP ang ipapadala sa email.
+    </p>
+
+    <input
+      type="email"
+      id="email"
+      placeholder="Admin Gmail"
+      class="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4"
+    />
+
+    <button
+      onclick="sendOTP()"
+      class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
+    >
+      Send OTP
+    </button>
+
+    <p id="status" class="text-center font-semibold mt-4 text-sm"></p>
+  </div>
+</div>
 
 <script type="module">
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -11,17 +36,26 @@
   );
 
   async function sendOTP() {
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const status = document.getElementById("status");
 
+    if (!email) {
+      status.textContent = "Please enter your Gmail address.";
+      status.className = "text-red-600 text-center font-semibold mt-4";
+      return;
+    }
+
     status.textContent = "Sending OTP...";
+    status.className = "text-blue-600 text-center font-semibold mt-4";
 
     const { error } = await supabase.auth.signInWithOtp({ email });
 
     if (error) {
       status.textContent = error.message;
+      status.className = "text-red-600 text-center font-semibold mt-4";
     } else {
       status.textContent = "OTP sent to your Gmail 📧";
+      status.className = "text-green-600 text-center font-semibold mt-4";
     }
   }
 </script>
