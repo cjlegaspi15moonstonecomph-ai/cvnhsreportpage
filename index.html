@@ -20,18 +20,17 @@
       class="w-24 h-24 mb-3"
     />
 
-    <h1 class="text-lg font-extrabold text-blue-800 text-center">
-      CALUBIG VALLEY NATIONAL HIGH SCHOOL
-    </h1>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-blue-200 flex justify-center items-center p-4">
 
-    <h2 class="text-2xl font-extrabold text-center mt-2 text-blue-700">
-      Incident Reporting
-    </h2>
+<div class="w-full max-w-2xl bg-white/90 backdrop-blur-xl shadow-2xl rounded-3xl p-8">
 
-    <p class="text-center text-sm text-gray-600 mt-1">
-      School Incident Reporting System
-    </p>
-  </div>
+  <h2 class="text-2xl font-extrabold text-center mb-2 text-blue-700">
+    Incident Reporting
+  </h2>
+
+  <p class="text-center text-sm text-gray-600 mb-6">
+    School Incident Reporting System
+  </p>
 
   <p id="studentName" class="text-center font-semibold text-gray-700 mb-6"></p>
 
@@ -39,7 +38,7 @@
 
     <!-- Name -->
     <div>
-      <label class="font-semibold text-gray-700">Name (Optional)</label>
+      <label class="font-semibold text-gray-700">Iyong Pangalan (opsyonal)</label>
       <input type="text" name="name"
         class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
     </div>
@@ -49,7 +48,7 @@
       <label class="font-semibold text-gray-700">Grade Level</label>
       <select name="grade_level" required
         class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white">
-        <option value="">Choose</option>
+        <option value="">Pumili</option>
         <option value="Grade 7">Grade 7</option>
         <option value="Grade 8">Grade 8</option>
         <option value="Grade 9">Grade 9</option>
@@ -98,9 +97,10 @@
 
       <div class="space-y-3 mt-2">
 
-        <details class="rounded-xl border bg-gray-50 p-3">
+        <!-- SECTION (dropdown arrow style) -->
+         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Section ↓</summary>
-          <input class="w-full mt-2 px-3 py-2 rounded-lg border">
+          <input id="desc_sino" class="w-full mt-2 px-3 py-2 rounded-lg border">
         </details>
 
         <details class="rounded-xl border bg-gray-50 p-3">
@@ -157,6 +157,80 @@
 
   </form>
 </div>
+
+<script>
+const student = JSON.parse(localStorage.getItem('student'));
+if (!student) window.location.href = "/index-login.html";
+else document.getElementById('studentName').textContent =
+  `Logged in as: ${student.name || student.lrn}`;
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("student");
+  window.location.replace("/index-login.html");
+});
+
+/* Report Type Other */
+document.getElementById("report_type").addEventListener("change", function () {
+  const otherField = document.getElementById("otherField");
+  if (this.value === "Other") otherField.classList.remove("hidden");
+  else {
+    otherField.classList.add("hidden");
+    otherInput.value = "";
+  }
+});
+
+/* Section Other */
+document.getElementById("desc_section").addEventListener("change", function () {
+  const otherBox = document.getElementById("section_other");
+  if (this.value === "Other") otherBox.classList.remove("hidden");
+  else {
+    otherBox.classList.add("hidden");
+    otherBox.value = "";
+  }
+});
+
+document.getElementById("reportForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const form = new FormData(this);
+  const status = document.getElementById("status");
+
+  let section = document.getElementById("desc_section").value;
+  if (section === "Other") section = document.getElementById("section_other").value;
+
+  const description = `
+Section: ${section}
+Sino: ${desc_sino.value}
+Ano: ${desc_ano.value}
+Kailan: ${desc_kailan.value}
+Bakit: ${desc_bakit.value}
+Paano: ${desc_paano.value}
+`;
+
+  form.set("description", description);
+
+  status.textContent = "Isinusumite...";
+
+  try {
+    const response = await fetch("/api/report", { method: "POST", body: form });
+    const result = await response.json();
+
+    if (result.success) {
+      status.textContent = "Matagumpay na naisumite ang ulat!";
+      status.className = "text-green-600 font-semibold";
+      this.reset();
+      section_other.classList.add("hidden");
+      otherField.classList.add("hidden");
+    } else {
+      status.textContent = "Hindi naisumite ang ulat.";
+      status.className = "text-red-600 font-semibold";
+    }
+  } catch {
+    status.textContent = "May error. Subukang muli.";
+    status.className = "text-red-600 font-semibold";
+  }
+});
+</script>
 
 </body>
 </html>
