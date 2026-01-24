@@ -28,7 +28,7 @@
     <div>
       <label class="font-semibold text-gray-700">Iyong Pangalan (opsyonal)</label>
       <input type="text" name="name"
-        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-4 focus:ring-blue-200">
+        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
     </div>
 
     <!-- Grade -->
@@ -79,11 +79,30 @@
         class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
     </div>
 
-    <!-- Description -->
+    <!-- DESCRIPTION -->
     <div>
       <label class="font-semibold text-gray-700">Description</label>
 
       <div class="space-y-3 mt-2">
+
+        <!-- Section -->
+        <div>
+          <label class="font-semibold text-gray-700">Section</label>
+          <select id="desc_section"
+            class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white">
+            <option value="">Select Section</option>
+            <option value="Section A">Section A</option>
+            <option value="Section B">Section B</option>
+            <option value="Section C">Section C</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div id="sectionOtherBox" class="hidden">
+          <label class="font-semibold text-gray-700">Specify Section</label>
+          <input id="section_other"
+            class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
+        </div>
 
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Sino ang sangkot?</summary>
@@ -92,7 +111,8 @@
 
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Ano ang nangyari?</summary>
-          <textarea id="desc_ano" rows="3" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
+          <textarea id="desc_ano" rows="3"
+            class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
         </details>
 
         <details class="rounded-xl border bg-gray-50 p-3">
@@ -102,20 +122,15 @@
 
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Bakit ito nangyari?</summary>
-          <textarea id="desc_bakit" rows="2" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
+          <textarea id="desc_bakit" rows="2"
+            class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
         </details>
 
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Paano ito nangyari?</summary>
-          <textarea id="desc_paano" rows="3" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
+          <textarea id="desc_paano" rows="3"
+            class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
         </details>
-
-        <div id="descOtherBox" class="hidden">
-          <label class="font-semibold text-gray-700">Ilagay ang ibang detalye</label>
-          <textarea id="desc_other_text"
-            rows="3"
-            class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300"></textarea>
-        </div>
 
       </div>
 
@@ -155,6 +170,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.replace("/index-login.html");
 });
 
+/* Report Type Other */
 document.getElementById("report_type").addEventListener("change", function () {
   const otherField = document.getElementById("otherField");
   if (this.value === "Other") otherField.classList.remove("hidden");
@@ -164,13 +180,13 @@ document.getElementById("report_type").addEventListener("change", function () {
   }
 });
 
-/* ✅ NEW JS: show/hide other description */
-document.getElementById("desc_other_select").addEventListener("change", function () {
-  const box = document.getElementById("descOtherBox");
+/* Section Other */
+document.getElementById("desc_section").addEventListener("change", function () {
+  const box = document.getElementById("sectionOtherBox");
   if (this.value === "Other") box.classList.remove("hidden");
   else {
     box.classList.add("hidden");
-    document.getElementById("desc_other_text").value = "";
+    document.getElementById("section_other").value = "";
   }
 });
 
@@ -180,42 +196,41 @@ document.getElementById("reportForm").addEventListener("submit", async function 
   const form = new FormData(this);
   const status = document.getElementById("status");
 
-  let description = `
-Sino: ${document.getElementById("desc_sino").value}
-Ano: ${document.getElementById("desc_ano").value}
-Kailan: ${document.getElementById("desc_kailan").value}
-Bakit: ${document.getElementById("desc_bakit").value}
-Paano: ${document.getElementById("desc_paano").value}
-`;
+  let section = document.getElementById("desc_section").value;
+  if (section === "Other") {
+    section = document.getElementById("section_other").value;
+  }
 
-  const otherDesc = document.getElementById("desc_other_text").value.trim();
-  if (otherDesc) description += `\nOther: ${otherDesc}`;
+  const description = `
+Section: ${section}
+Sino: ${desc_sino.value}
+Ano: ${desc_ano.value}
+Kailan: ${desc_kailan.value}
+Bakit: ${desc_bakit.value}
+Paano: ${desc_paano.value}
+`;
 
   form.set("description", description);
 
   status.textContent = "Isinusumite...";
 
   try {
-    const response = await fetch("/api/report", {
-      method: "POST",
-      body: form
-    });
-
+    const response = await fetch("/api/report", { method: "POST", body: form });
     const result = await response.json();
 
     if (result.success) {
       status.textContent = "Matagumpay na naisumite ang ulat!";
-      status.className = "text-green-600 text-center font-semibold";
+      status.className = "text-green-600 font-semibold";
       this.reset();
-      document.getElementById("otherField").classList.add("hidden");
-      document.getElementById("descOtherBox").classList.add("hidden");
+      sectionOtherBox.classList.add("hidden");
+      otherField.classList.add("hidden");
     } else {
       status.textContent = "Hindi naisumite ang ulat.";
-      status.className = "text-red-600 text-center font-semibold";
+      status.className = "text-red-600 font-semibold";
     }
   } catch {
     status.textContent = "May error. Subukang muli.";
-    status.className = "text-red-600 text-center font-semibold";
+    status.className = "text-red-600 font-semibold";
   }
 });
 </script>
