@@ -6,113 +6,143 @@
   <title>Student Login</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
     body {
       margin: 0;
-      font-family: "Segoe UI";
-      background: linear-gradient(135deg,#dbeafe,#bfdbfe);
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      padding: 24px;
     }
 
-    /* 🔹 Admin menu button */
+    /* Admin menu */
     .admin-menu {
       position: fixed;
-      top: 16px;
-      right: 16px;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
     }
 
     .admin-menu a {
-      background: white;
-      padding: 8px 14px;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.25);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: white;
+      padding: 8px 16px;
       border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
-      color: #1e40af;
       text-decoration: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.2s;
     }
 
     .admin-menu a:hover {
-      background: #e0e7ff;
+      background: rgba(255,255,255,0.4);
+      transform: translateY(-1px);
     }
 
+    /* Login card */
     .login-box {
-      background:white;
-      width:100%;
-      max-width:420px;
-      padding:36px 32px;
-      border-radius:24px;
-      box-shadow:0 12px 30px rgba(0,0,0,0.15);
+      width: 100%;
+      max-width: 420px;
+      padding: 36px 32px;
+      border-radius: 28px;
+      backdrop-filter: blur(18px);
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
     }
 
     .login-box h2 {
-      text-align:center;
-      color:#1e40af;
-      font-size:22px;
-      font-weight:700;
-      margin-bottom:26px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 28px;
     }
 
     .login-box input {
-      width:100%;
-      padding:14px 16px;
-      margin-bottom:14px;
-      border-radius:14px;
-      border:2px solid #cbd5e1;
-      font-size:15px;
-      background:#fff;
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      border: none;
+      font-size: 15px;
+      background: rgba(255,255,255,0.9);
+      outline: none;
+      transition: box-shadow 0.2s, transform 0.1s;
     }
 
     .login-box input:focus {
-      outline:none;
-      border-color:#2563eb;
-      box-shadow:0 0 0 3px rgba(37,99,235,0.25);
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.5);
+      transform: scale(1.01);
     }
 
     .login-box button {
-      width:100%;
-      padding:14px;
-      margin-top:6px;
-      background:#2563eb;
-      color:white;
-      border:none;
-      border-radius:14px;
-      font-size:16px;
-      font-weight:600;
-      cursor:pointer;
+      width: 100%;
+      padding: 14px;
+      margin-top: 8px;
+      border-radius: 16px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      background: white;
+      color: #2563eb;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
 
     .login-box button:hover {
-      background:#1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
 
     #status {
-      text-align:center;
-      font-weight:600;
-      margin-top:12px;
-      font-size:14px;
+      text-align: center;
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- 🔹 Admin Login Menu Button -->
+  <!-- Admin Login Shortcut -->
   <div class="admin-menu">
     <a href="/admin-login.html">Admin Login</a>
   </div>
 
+  <!-- Student Login -->
   <div class="login-box">
-    <h2>Mag-login gamit ang LRN</h2>
+    <h2>Student Login</h2>
 
     <form id="loginForm">
-      <input type="text" name="lrn" placeholder="Ilagay ang iyong 12-digit LRN" inputmode="numeric" maxlength="12" required>
-      <input type="password" name="password" placeholder="Password (optional)">
-      <button type="submit">Mag-login</button>
+      <input
+        type="text"
+        name="lrn"
+        placeholder="12-digit LRN"
+        inputmode="numeric"
+        maxlength="12"
+        required
+      />
+
+      <input
+        type="password"
+        name="password"
+        placeholder="Password (optional)"
+      />
+
+      <button type="submit">Log In</button>
       <p id="status"></p>
     </form>
   </div>
@@ -129,7 +159,7 @@
       const status = document.getElementById("status");
 
       status.textContent = "Logging in...";
-      status.style.color = "black";
+      status.style.color = "white";
 
       try {
         const res = await fetch("/api/student/login", {
@@ -143,15 +173,15 @@
         if (res.ok && result.success) {
           localStorage.setItem("student", JSON.stringify(result.student));
           status.textContent = "Login successful!";
-          status.style.color = "green";
+          status.style.color = "#bbf7d0";
           window.location.replace("/index.html");
         } else {
           status.textContent = result.error || "Login failed";
-          status.style.color = "red";
+          status.style.color = "#fecaca";
         }
       } catch (err) {
         status.textContent = "Network error — cannot reach server";
-        status.style.color = "red";
+        status.style.color = "#fecaca";
       }
     });
   </script>
