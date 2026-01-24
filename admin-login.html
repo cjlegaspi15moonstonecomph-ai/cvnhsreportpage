@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Login</title>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Optional font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Optional font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-    }
-  </style>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+</style>
 </head>
 
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 p-6">
@@ -46,7 +44,7 @@
 
     <!-- Button -->
     <button
-      onclick="sendOTP()"
+      id="sendOtpBtn"
       class="w-full bg-white text-blue-700 font-semibold py-4 rounded-xl
              hover:bg-blue-50 active:scale-[0.98] transition"
     >
@@ -54,7 +52,7 @@
     </button>
 
     <!-- Status -->
-    <p id="status" class="text-center font-semibold mt-6 text-sm text-white"></p>
+    <p id="status" class="text-center font-semibold mt-6 text-white"></p>
 
   </div>
 
@@ -67,9 +65,11 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
     );
 
-    async function sendOTP() {
+    const status = document.getElementById("status");
+    const btn = document.getElementById("sendOtpBtn");
+
+    btn.addEventListener("click", async () => {
       const email = document.getElementById("email").value.trim();
-      const status = document.getElementById("status");
 
       if (!email) {
         status.textContent = "Please enter your Gmail address";
@@ -89,7 +89,7 @@
         status.textContent = "OTP sent successfully 📧 Check your inbox";
         status.className = "text-center font-semibold mt-6 text-green-200";
       }
-    }
+    });
   </script>
 
 </body>
