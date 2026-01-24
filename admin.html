@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="p-4 bg-gray-100">
+  <h1 class="text-2xl font-bold mb-4">Admin Dashboard</h1>
+
+  <table id="reportsTable" class="min-w-full border">
+    <thead>
+      <tr>
+        <th class="border p-2">Name</th>
+        <th class="border p-2">Grade</th>
+        <th class="border p-2">Report Type</th>
+        <th class="border p-2">Location</th>
+        <th class="border p-2">Description</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabase = createClient(
+      "https://YOUR_PROJECT_ID.supabase.co",
+      "YOUR_PUBLIC_ANON_KEY"
+    );
+
+    // 🔹 STEP 4: Check if logged in
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      window.location.replace("/admin-login.html");
+      throw new Error("Not logged in");
+    }
+
+    // 🔹 STEP 5: Check if user is an admin
+    const { data: admin, error: adminError } = await supabase
+      .from("admins")
+      .select("*")
+      .eq("email", user.email)
+      .single();
+
+    if (adminError || !admin) {
+      alert("Access denied. Admins only.");
+      await supabase.auth.signOut();
+      window.location.replace("/admin-login.html");
+      throw new Error("Not an admin");
+    }
+
+    // ✅ If we reach here → user is a valid admin
+    console.log("Admin verified:", user.email);
+
+    // TODO: fetch reports here later
+  </script>
+
+</body>
+</html>

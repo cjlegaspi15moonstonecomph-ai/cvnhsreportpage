@@ -1,0 +1,27 @@
+<input type="email" id="email" placeholder="Admin Gmail" />
+<button onclick="sendOTP()">Send OTP</button>
+<p id="status"></p>
+
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+  const supabase = createClient(
+    "https://YOUR_PROJECT_ID.supabase.co",
+    "YOUR_PUBLIC_ANON_KEY"
+  );
+
+  async function sendOTP() {
+    const email = document.getElementById("email").value;
+    const status = document.getElementById("status");
+
+    status.textContent = "Sending OTP...";
+
+    const { error } = await supabase.auth.signInWithOtp({ email });
+
+    if (error) {
+      status.textContent = error.message;
+    } else {
+      status.textContent = "OTP sent to your Gmail 📧";
+    }
+  }
+</script>
