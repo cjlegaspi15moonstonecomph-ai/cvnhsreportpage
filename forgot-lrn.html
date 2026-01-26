@@ -6,6 +6,7 @@
   <title>Forgot LRN</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 
+  <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -84,26 +85,52 @@
       font-weight: 600;
       color: white;
     }
+
+    #backBtn {
+      width: 100%;
+      margin-top: 8px;
+      border-radius: 16px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.3);
+      color: white;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    #backBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
   </style>
 </head>
 
 <body>
   <div class="login-box">
-    <h2>Enter Your Code</h2>
+    <h2>Enter Section Code</h2>
 
     <form id="codeForm">
       <input
         type="text"
         name="code"
-        placeholder="Enter assigned code"
+        placeholder="Enter Section Code"
         required
       />
       <button type="submit">Submit</button>
       <p id="status"></p>
     </form>
+
+    <button id="backBtn">Back to Login</button>
   </div>
 
   <script>
+    // Back button to go back to login page
+    document.getElementById("backBtn").addEventListener("click", () => {
+      window.location.href = "/student-login.html";
+    });
+
+    // Handle section code verification
     document.getElementById("codeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -123,7 +150,8 @@
         const result = await res.json();
 
         if (res.ok && result.success) {
-          localStorage.setItem("student", JSON.stringify(result.student));
+          // Pick first student in section for demo
+          localStorage.setItem("student", JSON.stringify(result.students[0]));
           status.textContent = "Code verified!";
           status.style.color = "#bbf7d0";
           window.location.replace("/index.html");
