@@ -151,7 +151,7 @@ document.getElementById("codeForm").addEventListener("submit", async (e) => {
   const { data, error } = await supabase
     .from("sections")
     .select("*")
-    .eq("section_code", code);
+    .eq("code", code);
 
   console.log("Supabase returned:", data, error);
 
