@@ -11,79 +11,180 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-
   <style>
-    body { margin:0; min-height:100vh; font-family:'Inter', system-ui, sans-serif; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#2563eb,#38bdf8); padding:24px; }
-    .login-box { width:100%; max-width:420px; padding:36px 32px; border-radius:28px; backdrop-filter:blur(18px); background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.35); box-shadow:0 20px 40px rgba(0,0,0,0.25); }
-    .login-box h2 { text-align:center; font-size:26px; font-weight:700; color:white; margin-bottom:28px; }
-    .login-box input { width:100%; padding:14px 16px; margin-bottom:14px; border-radius:14px; border:none; font-size:15px; background:rgba(255,255,255,0.9); outline:none; transition:box-shadow 0.2s, transform 0.1s; }
-    .login-box input:focus { box-shadow:0 0 0 4px rgba(255,255,255,0.5); transform:scale(1.01); }
-    .login-box button { width:100%; padding:14px; margin-top:8px; border-radius:16px; border:none; font-size:16px; font-weight:600; background:white; color:#2563eb; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; }
-    .login-box button:hover { transform:translateY(-1px); box-shadow:0 10px 25px rgba(0,0,0,0.2); }
-    #status { text-align:center; margin-top:14px; font-size:14px; font-weight:600; color:white; }
-    #forgotBtn { width:100%; margin-top:8px; border-radius:16px; border:none; font-size:14px; font-weight:600; background:rgba(255,255,255,0.3); color:white; cursor:pointer; transition:transform 0.15s, box-shadow 0.15s; }
-    #forgotBtn:hover { transform:translateY(-1px); box-shadow:0 10px 25px rgba(0,0,0,0.15); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      padding: 24px;
+    }
+
+    /* Admin menu */
+    .admin-menu {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    .admin-menu a {
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.25);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .admin-menu a:hover {
+      background: rgba(255,255,255,0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Login card */
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      padding: 36px 32px;
+      border-radius: 28px;
+      backdrop-filter: blur(18px);
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+
+    .login-box h2 {
+      text-align: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 28px;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      border: none;
+      font-size: 15px;
+      background: rgba(255,255,255,0.9);
+      outline: none;
+      transition: box-shadow 0.2s, transform 0.1s;
+    }
+
+    .login-box input:focus {
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.5);
+      transform: scale(1.01);
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 8px;
+      border-radius: 16px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      background: white;
+      color: #2563eb;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .login-box button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    #status {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
   </style>
 </head>
+
 <body>
+
+  <!-- Admin Login Shortcut -->
+  <div class="admin-menu">
+    <a href="/admin-login.html">Admin Login</a>
+  </div>
+
+  <!-- Student Login -->
   <div class="login-box">
     <h2>Student Login</h2>
 
     <form id="loginForm">
-      <input type="text" name="lrn" placeholder="Enter your 12-digit LRN" maxlength="12" required />
+      <input
+        type="text"
+        name="lrn"
+        placeholder="12-digit LRN"
+        inputmode="numeric"
+        maxlength="12"
+        required
+      />
+
+      <input
+        type="password"
+        name="password"
+        placeholder="Password (optional)"
+      />
+
       <button type="submit">Log In</button>
       <p id="status"></p>
     </form>
-
-    <button id="forgotBtn">Forgot LRN? Use Section Code</button>
   </div>
 
   <script>
-    // ---------------- SUPABASE SETUP ----------------
-    const SUPABASE_URL = "https://grkromlvleczjfkrzmol.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"; // replace with your anon key
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Redirect already logged-in students
+    const student = JSON.parse(localStorage.getItem('student'));
+    if (student) window.location.replace('/index.html');
 
-    // ---------------- FORGOT BUTTON ----------------
-    document.getElementById("forgotBtn").addEventListener("click", () => {
-      window.location.href = "forgot-lrn.html";
-    });
-
-    // ---------------- LOGIN FORM ----------------
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const lrn = document.querySelector('input[name="lrn"]').value.trim();
       const status = document.getElementById("status");
+
       status.textContent = "Logging in...";
       status.style.color = "white";
 
       try {
-        const { data: student, error } = await supabase
-          .from('students')
-          .select('*')
-          .eq('lrn', lrn)
-          .single();
+        const res = await fetch("/api/student/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lrn })
+        });
 
-        if (error || !student) {
-          status.textContent = "LRN not found";
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+          localStorage.setItem("student", JSON.stringify(result.student));
+          status.textContent = "Login successful!";
+          status.style.color = "#bbf7d0";
+          window.location.replace("/index.html");
+        } else {
+          status.textContent = result.error || "Login failed";
           status.style.color = "#fecaca";
-          return;
         }
-
-        localStorage.setItem("student", JSON.stringify(student));
-        status.textContent = "Login successful!";
-        status.style.color = "#bbf7d0";
-
-        // Redirect to home page
-        window.location.href = "index.html";
       } catch (err) {
-        console.error(err);
         status.textContent = "Network error — cannot reach server";
         status.style.color = "#fecaca";
       }
     });
   </script>
+
 </body>
 </html>
