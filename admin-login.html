@@ -39,39 +39,26 @@
     <p id="status" class="text-center font-semibold mt-6 text-sm text-white"></p>
   </div>
 
+<!-- unchanged UI -->
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// Initialize Supabase client
 const supabase = createClient(
   "https://grkromlvleczjfkrzmol.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+  "YOUR_PUBLIC_ANON_KEY"
 );
 
 const status = document.getElementById("status");
 const emailInput = document.getElementById("email");
 
-// 1️⃣ Initialize page
 async function init() {
-  // Handle magic link callback
-  const { data: magicData, error: magicError } = await supabase.auth.getSessionFromUrl({ storeSession: true });
-  if (magicError) console.error("Magic link error:", magicError);
-
-  if (magicData?.session) {
-    window.location.replace("/admin-dashboard.html");
-  }
-
-  // Already logged in?
+  // Check if already logged in
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    window.location.replace("/admin-dashboard.html");
-  }
+  if (session) window.location.replace("/admin.html");
 }
 
-// 2️⃣ Send magic link / OTP
 async function sendOTP() {
   const email = emailInput.value.trim();
-
   if (!email) {
     status.textContent = "Please enter your Gmail";
     status.className = "text-red-200 text-center mt-6 font-semibold";
@@ -85,7 +72,7 @@ async function sendOTP() {
     email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: window.location.origin + "/admin.html"
+      emailRedirectTo: window.location.origin + "/admin.html" // redirect to dashboard
     }
   });
 
@@ -98,12 +85,10 @@ async function sendOTP() {
   }
 }
 
-// Initialize page
 init();
-
-// Bind button click
 document.getElementById("sendOTPBtn").addEventListener("click", sendOTP);
 </script>
+
 
 </body>
 </html>

@@ -39,48 +39,62 @@
   </div>
 
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    const supabase = createClient(
-      "https://grkromlvleczjfkrzmol.supabase.co",
-      "YOUR_PUBLIC_ANON_KEY"
-    );
+const supabase = createClient(
+  "https://grkromlvleczjfkrzmol.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+);
 
-    // Check session
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) window.location.replace("/admin-login.html");
+const logoutBtn = document.getElementById("logoutBtn");
 
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      window.location.replace("/admin-login.html");
+async function init() {
+  // 1️⃣ Try to get session from magic link (if coming from email)
+  const { data: magicData, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+  if (error) console.error("Magic link error:", error);
+
+  // 2️⃣ Check existing session
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    // No session? Go back to login
+    window.location.replace("/admin-login.html");
+    return;
+  }
+
+  // Now you have a valid session, you can load your reports
+  loadReports();
+}
+
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  window.location.replace("/admin-login.html");
+});
+
+async function loadReports() {
+  try {
+    const res = await fetch("/api/reports"); // your API
+    const reports = await res.json();
+    const tbody = document.getElementById("reportsTable");
+    tbody.innerHTML = "";
+    reports.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="p-4">${r.name}</td>
+        <td class="p-4">${r.grade_level}</td>
+        <td class="p-4">${r.report_type}</td>
+        <td class="p-4">${r.location}</td>
+        <td class="p-4">${r.description}</td>
+      `;
+      tbody.appendChild(tr);
     });
+  } catch (err) {
+    console.error(err);
+  }
+}
 
-    // Load reports (example: fetch from API)
-    async function loadReports() {
-      try {
-        const res = await fetch("/api/reports"); // make sure your API exists
-        const reports = await res.json();
-        const tbody = document.getElementById("reportsTable");
-        tbody.innerHTML = "";
+// Initialize dashboard
+init();
+</script>
 
-        reports.forEach(r => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td class="p-4">${r.name}</td>
-            <td class="p-4">${r.grade_level}</td>
-            <td class="p-4">${r.report_type}</td>
-            <td class="p-4">${r.location}</td>
-            <td class="p-4">${r.description}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    loadReports();
-  </script>
 </body>
 </html>
