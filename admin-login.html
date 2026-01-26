@@ -30,7 +30,7 @@
     />
 
     <button
-      onclick="sendOTP()"
+      id="sendOTPBtn"
       class="w-full bg-white text-blue-700 font-semibold py-4 rounded-xl hover:bg-blue-50 active:scale-[0.98] transition"
     >
       Send One-Time Password
@@ -51,9 +51,9 @@ const supabase = createClient(
 const status = document.getElementById("status");
 const emailInput = document.getElementById("email");
 
-// Wrap top-level async code in a function
+// 1️⃣ Initialize page
 async function init() {
-  // 1️⃣ Handle magic link callback
+  // Handle magic link callback
   const { data: magicData, error: magicError } = await supabase.auth.getSessionFromUrl({ storeSession: true });
   if (magicError) console.error("Magic link error:", magicError);
 
@@ -61,14 +61,14 @@ async function init() {
     window.location.replace("/admin-dashboard.html");
   }
 
-  // 2️⃣ Check if user is already logged in
+  // Already logged in?
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
     window.location.replace("/admin-dashboard.html");
   }
 }
 
-// 3️⃣ Send magic link / OTP
+// 2️⃣ Send magic link / OTP
 async function sendOTP() {
   const email = emailInput.value.trim();
 
@@ -104,8 +104,6 @@ init();
 // Bind button click
 document.getElementById("sendOTPBtn").addEventListener("click", sendOTP);
 </script>
-
-
 
 </body>
 </html>
