@@ -106,6 +106,9 @@
   </style>
 </head>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
 <body>
   <div class="login-box">
     <h2>Enter Section Code</h2>
@@ -130,41 +133,57 @@
   window.history.back();
 });
 
+  // ✅ CREATE SUPABASE CLIENT
+  const supabase = supabaseJs.createClient(
+    "https://grkromlvleczjfkrzmol.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0Y" // anon key only
+  );
 
-    // Handle section code verification
-    document.getElementById("codeForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+  // HANDLE FORM SUBMIT
+  document.getElementById("codeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const code = document.querySelector('input[name="code"]').value.trim();
-      const status = document.getElementById("status");
+    const code = document.querySelector('input[name="code"]').value.trim();
+    const status = document.getElementById("status");
 
-      status.textContent = "Verifying code...";
-      status.style.color = "white";
+    status.textContent = "Verifying code...";
+    status.style.color = "white";
 
-      try {
-        const res = await fetch("/api/student/verify-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code })
-        });
+    /* 1️⃣ CHECK SECTION CODE */
+    const { data: section, error: sectionError } = await supabase
+      .from("sections")
+      .select("*")
+      .eq("code", code)
+      .single();
 
-        const result = await res.json();
+    if (sectionError || !section) {
+      status.textContent = "Invalid section code";
+      status.style.color = "#fecaca";
+      return;
+    }
 
-        if (res.ok && result.success) {
-          // Pick first student in section for demo
-          localStorage.setItem("student", JSON.stringify(result.students[0]));
-          status.textContent = "Code verified!";
-          status.style.color = "#bbf7d0";
-          window.location.replace("/index.html");
-        } else {
-          status.textContent = result.error || "Invalid code";
-          status.style.color = "#fecaca";
-        }
-      } catch (err) {
-        status.textContent = "Network error — cannot reach server";
-        status.style.color = "#fecaca";
-      }
-    });
-  </script>
+    /* 2️⃣ GET STUDENTS FROM THAT SECTION */
+    const { data: students, error: studentsError } = await supabase
+      .from("students")
+      .select("*")
+      .eq("section", section.section);
+
+    if (studentsError || !students || students.length === 0) {
+      status.textContent = "No students found for this section";
+      status.style.color = "#fecaca";
+      return;
+    }
+
+    /* 3️⃣ SAVE STUDENT + REDIRECT */
+    localStorage.setItem("student", JSON.stringify(students[0]));
+    status.textContent = "Code verified!";
+    status.style.color = "#bbf7d0";
+
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 700);
+  });
+</script>
+
 </body>
 </html>
