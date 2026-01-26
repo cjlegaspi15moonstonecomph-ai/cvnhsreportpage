@@ -47,58 +47,20 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
 );
 
-const status = document.getElementById("status");
-
-/* ===============================
-   1️⃣ HANDLE MAGIC LINK FIRST
-   =============================== */
-const { data: magicData, error: magicError } =
-  await supabase.auth.getSessionFromUrl({ storeSession: true });
-
-if (magicData?.session) {
-  window.location.replace("/admin-dashboard.html");
-}
-
-/* ===============================
-   2️⃣ ALREADY LOGGED IN?
-   =============================== */
-const { data: { session } } = await supabase.auth.getSession();
-if (session) {
-  window.location.replace("/admin-dashboard.html");
-}
-
-/* ===============================
-   3️⃣ SEND MAGIC LINK
-   =============================== */
 window.sendOTP = async () => {
-  const email = document.getElementById("email").value.trim();
-
-  if (!email) {
-    status.textContent = "Please enter your Gmail";
-    status.className = "text-red-200 text-center mt-6 font-semibold";
-    return;
-  }
-
-  status.textContent = "Sending magic link…";
-  status.className = "text-white text-center mt-6 font-semibold";
+  const email = document.getElementById("email").value;
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      shouldCreateUser: true,
-      emailRedirectTo: window.location.origin + "/admin-login.html"
+      emailRedirectTo: window.location.origin
     }
   });
 
-  if (error) {
-    status.textContent = error.message;
-    status.className = "text-red-200 text-center mt-6 font-semibold";
-  } else {
-    status.textContent = "Check your Gmail 📧 (Inbox or Spam)";
-    status.className = "text-green-200 text-center mt-6 font-semibold";
-  }
+  alert(error ? error.message : "Email sent!");
 };
 </script>
+
 
 
 </body>
