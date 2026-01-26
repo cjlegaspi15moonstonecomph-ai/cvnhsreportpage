@@ -108,7 +108,6 @@
     }
   </style>
 </head>
-
 <body>
   <div class="login-box">
     <h2>Enter Section Code</h2>
@@ -125,16 +124,15 @@
   <script>
     // ---------------- SUPABASE SETUP ----------------
     const SUPABASE_URL = "https://grkromlvleczjfkrzmol.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"; // replace with your anon key
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ---------------- BACK BUTTON ----------------
     document.getElementById("backBtn").addEventListener("click", () => {
-    window.location.href = "https://grkromlvleczjfkrzmol.supabase.co/storage/v1/object/public/student-login.html";
+      window.location.href = "index-login.html"; // full path if needed
     });
 
-
-    // ---------------- HANDLE SECTION CODE ----------------
+    // ---------------- SECTION CODE LOGIN ----------------
     document.getElementById("codeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -144,7 +142,7 @@
       status.style.color = "white";
 
       try {
-        // 1️⃣ Check if section code exists
+        // Check section code
         const { data: sectionData, error: sectionError } = await supabase
           .from('sections')
           .select('section')
@@ -157,7 +155,7 @@
           return;
         }
 
-        // 2️⃣ Get students in that section
+        // Get students in section
         const { data: studentsData, error: studentsError } = await supabase
           .from('students')
           .select('*')
@@ -169,11 +167,10 @@
           return;
         }
 
-        // 3️⃣ Save first student to localStorage and redirect
         localStorage.setItem("student", JSON.stringify(studentsData[0]));
         status.textContent = "Code verified!";
         status.style.color = "#bbf7d0";
-        window.location.href = "index.html"; // redirect to homepage
+        window.location.href = "index.html"; // redirect home
       } catch (err) {
         console.error(err);
         status.textContent = "Network error — cannot reach server";
