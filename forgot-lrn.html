@@ -1,170 +1,69 @@
 <!DOCTYPE html>
 <html lang="fil">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Forgot LRN</title>
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
 
-  <!-- Google Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: 'Inter', system-ui, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #2563eb, #38bdf8);
-      padding: 24px;
-    }
-
-    .login-box {
-      width: 100%;
-      max-width: 420px;
-      padding: 36px 32px;
-      border-radius: 28px;
-      backdrop-filter: blur(18px);
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.35);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-    }
-
-    .login-box h2 {
-      text-align: center;
-      font-size: 26px;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 28px;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 14px 16px;
-      margin-bottom: 14px;
-      border-radius: 14px;
-      border: none;
-      font-size: 15px;
-      background: rgba(255,255,255,0.9);
-      outline: none;
-      transition: box-shadow 0.2s, transform 0.1s;
-    }
-
-    .login-box input:focus {
-      box-shadow: 0 0 0 4px rgba(255,255,255,0.5);
-      transform: scale(1.01);
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 8px;
-      border-radius: 16px;
-      border: none;
-      font-size: 16px;
-      font-weight: 600;
-      background: white;
-      color: #2563eb;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .login-box button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-
-    #status {
-      text-align: center;
-      margin-top: 14px;
-      font-size: 14px;
-      font-weight: 600;
-      color: white;
-    }
-
-    #backBtn {
-      width: 100%;
-      margin-top: 8px;
-      border-radius: 16px;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      background: rgba(255,255,255,0.3);
-      color: white;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    #backBtn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-  <div class="login-box">
-    <h2>Enter Section Code</h2>
+  <h2>Enter Section Code</h2>
 
-    <form id="codeForm">
-      <input
-        type="text"
-        name="code"
-        placeholder="Enter Section Code"
-        required
-      />
-      <button type="submit">Submit</button>
-      <p id="status"></p>
-    </form>
+  <form id="codeForm">
+    <input id="code" placeholder="Section Code" required />
+    <button type="submit">Submit</button>
+  </form>
 
-    <button id="backBtn">Back to Login</button>
-  </div>
+  <p id="status"></p>
+
+  <button id="backBtn">Back to Login</button>
 
   <script>
-    // Back button to go back to login page
-    document.getElementById("backBtn").addEventListener("click", () => {
-  window.history.back();
-});
+    const supabase = supabaseJs.createClient(
+      "https://grkromlvleczjfkrzmol.supabase.co",
+      "YOUR_PUBLIC_ANON_KEY"
+    );
 
+    // BACK BUTTON
+    document.getElementById("backBtn").onclick = () => {
+      window.location.href = "index.html";
+    };
 
-    // Handle section code verification
-    document.getElementById("codeForm").addEventListener("submit", async (e) => {
+    // SUBMIT
+    document.getElementById("codeForm").onsubmit = async (e) => {
       e.preventDefault();
-
-      const code = document.querySelector('input[name="code"]').value.trim();
+      const code = document.getElementById("code").value.trim();
       const status = document.getElementById("status");
 
-      status.textContent = "Verifying code...";
-      status.style.color = "white";
+      status.textContent = "Verifying...";
 
-      try {
-        const res = await fetch("/api/student/verify-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code })
-        });
+      // 1️⃣ check section
+      const { data: section, error } = await supabase
+        .from("sections")
+        .select("*")
+        .eq("code", code)
+        .single();
 
-        const result = await res.json();
-
-        if (res.ok && result.success) {
-          // Pick first student in section for demo
-          localStorage.setItem("student", JSON.stringify(result.students[0]));
-          status.textContent = "Code verified!";
-          status.style.color = "#bbf7d0";
-          window.location.replace("/index.html");
-        } else {
-          status.textContent = result.error || "Invalid code";
-          status.style.color = "#fecaca";
-        }
-      } catch (err) {
-        status.textContent = "Network error — cannot reach server";
-        status.style.color = "#fecaca";
+      if (error || !section) {
+        status.textContent = "Invalid section code";
+        return;
       }
-    });
+
+      // 2️⃣ get students
+      const { data: students } = await supabase
+        .from("students")
+        .select("*")
+        .eq("section", section.section);
+
+      if (!students || students.length === 0) {
+        status.textContent = "No students found";
+        return;
+      }
+
+      localStorage.setItem("student", JSON.stringify(students[0]));
+      window.location.href = "index.html";
+    };
   </script>
 </body>
 </html>
