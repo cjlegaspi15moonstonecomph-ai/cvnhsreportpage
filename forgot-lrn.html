@@ -149,7 +149,7 @@ document.getElementById("codeForm").addEventListener("submit", async (e) => {
 
   // Query Supabase
   const { data, error } = await supabase
-    .from("students")
+    .from("sections")
     .select("*")
     .eq("section_code", code);
 
