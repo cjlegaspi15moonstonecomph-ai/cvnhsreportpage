@@ -42,23 +42,67 @@
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+// Initialize Supabase client
 const supabase = createClient(
   "https://grkromlvleczjfkrzmol.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
 );
 
-window.sendOTP = async () => {
-  const email = document.getElementById("email").value;
+const status = document.getElementById("status");
+const emailInput = document.getElementById("email");
+
+// Wrap top-level async code in a function
+async function init() {
+  // 1️⃣ Handle magic link callback
+  const { data: magicData, error: magicError } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+  if (magicError) console.error("Magic link error:", magicError);
+
+  if (magicData?.session) {
+    window.location.replace("/admin-dashboard.html");
+  }
+
+  // 2️⃣ Check if user is already logged in
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    window.location.replace("/admin-dashboard.html");
+  }
+}
+
+// 3️⃣ Send magic link / OTP
+async function sendOTP() {
+  const email = emailInput.value.trim();
+
+  if (!email) {
+    status.textContent = "Please enter your Gmail";
+    status.className = "text-red-200 text-center mt-6 font-semibold";
+    return;
+  }
+
+  status.textContent = "Sending magic link…";
+  status.className = "text-white text-center mt-6 font-semibold";
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: window.location.origin
+      shouldCreateUser: true,
+      emailRedirectTo: window.location.origin + "/admin-login.html"
     }
   });
 
-  alert(error ? error.message : "Email sent!");
-};
+  if (error) {
+    status.textContent = error.message;
+    status.className = "text-red-200 text-center mt-6 font-semibold";
+  } else {
+    status.textContent = "Check your Gmail 📧 (Inbox or Spam)";
+    status.className = "text-green-200 text-center mt-6 font-semibold";
+  }
+}
+
+// Initialize page
+init();
+
+// Bind button click
+document.getElementById("sendOTPBtn").addEventListener("click", sendOTP);
 </script>
 
 
