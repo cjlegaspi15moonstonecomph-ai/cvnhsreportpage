@@ -170,7 +170,8 @@
         localStorage.setItem("student", JSON.stringify(studentsData[0]));
         status.textContent = "Code verified!";
         status.style.color = "#bbf7d0";
-        window.location.href = "index.html"; // redirect home
+        window.location.href = "index.html"; // redirect to login/home page
+
       } catch (err) {
         console.error(err);
         status.textContent = "Network error — cannot reach server";
