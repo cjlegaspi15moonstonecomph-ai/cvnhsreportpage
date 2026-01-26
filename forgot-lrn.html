@@ -124,15 +124,14 @@
 
   <script>
     // ----- SUPABASE SETUP -----
-    const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co"; // replace with your Supabase URL
-    const SUPABASE_ANON_KEY = "YOUR_ANON_KEY"; // replace with your anon key
+    const SUPABASE_URL = "https://grkromlvleczjfkrzmol.supabase.co"; // replace with your project URL
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"; // replace with your anon key
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Back button to go back to login page
     document.getElementById("backBtn").addEventListener("click", () => {
       window.location.href = "index-login.html";
     });
-
 
     // ----- HANDLE SECTION CODE -----
     document.getElementById("codeForm").addEventListener("submit", async (e) => {
@@ -143,7 +142,7 @@
       status.style.color = "white";
 
       try {
-        // 1️⃣ Check if section code exists
+        // Check if the code exists in sections table
         const { data: sectionData, error: sectionError } = await supabase
           .from('sections')
           .select('*')
@@ -156,23 +155,23 @@
           return;
         }
 
-        // 2️⃣ Get students in that section
+        // Get all students in that section
         const { data: studentsData, error: studentsError } = await supabase
           .from('students')
           .select('*')
           .eq('section', sectionData.section);
 
         if (studentsError || !studentsData || studentsData.length === 0) {
-          status.textContent = "No students found in this section";
+          status.textContent = "No students found for this section";
           status.style.color = "#fecaca";
           return;
         }
 
-        // 3️⃣ Save first student to localStorage and redirect
+        // For demo, pick the first student
         localStorage.setItem("student", JSON.stringify(studentsData[0]));
         status.textContent = "Code verified!";
         status.style.color = "#bbf7d0";
-        window.location.href = "index.html"; // or your home page
+        window.location.replace("index.html"); // or student-login.html
       } catch (err) {
         console.error(err);
         status.textContent = "Network error — cannot reach server";
