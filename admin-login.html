@@ -49,13 +49,27 @@ const supabase = createClient(
 
 const status = document.getElementById("status");
 
-// ✅ If already logged in → go dashboard
+/* ===============================
+   1️⃣ HANDLE MAGIC LINK FIRST
+   =============================== */
+const { data: magicData, error: magicError } =
+  await supabase.auth.getSessionFromUrl({ storeSession: true });
+
+if (magicData?.session) {
+  window.location.replace("/admin-dashboard.html");
+}
+
+/* ===============================
+   2️⃣ ALREADY LOGGED IN?
+   =============================== */
 const { data: { session } } = await supabase.auth.getSession();
 if (session) {
   window.location.replace("/admin-dashboard.html");
 }
 
-// ✅ Send magic link
+/* ===============================
+   3️⃣ SEND MAGIC LINK
+   =============================== */
 window.sendOTP = async () => {
   const email = document.getElementById("email").value.trim();
 
@@ -72,7 +86,7 @@ window.sendOTP = async () => {
     email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: window.location.origin + "/admin-dashboard.html"
+      emailRedirectTo: window.location.origin + "/admin-login.html"
     }
   });
 
@@ -85,6 +99,7 @@ window.sendOTP = async () => {
   }
 };
 </script>
+
 
 </body>
 </html>
