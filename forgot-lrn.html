@@ -106,16 +106,6 @@
   </style>
 </head>
 
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-  const supabase = createClient(
-    "https://grkromlvleczjfkrzmol.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
-  );
-</script>
-
-
 <body>
   <div class="login-box">
     <h2>Enter Section Code</h2>
@@ -134,52 +124,62 @@
     <button id="backBtn">Back to Login</button>
   </div>
 
-  <script type="module">
+ <script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-  // Back button
-  document.getElementById("backBtn").addEventListener("click", () => {
-    window.location.href = "index-login.html";
-  });
+const supabase = createClient(
+  "https://grkromlvleczjfkrzmol.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+);
 
-  // Handle section code verification
-  document.getElementById("codeForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+// Back button
+document.getElementById("backBtn").addEventListener("click", () => {
+  window.location.href = "index-login.html";
+});
 
-    const code = document.querySelector('input[name="code"]').value.trim();
-    const status = document.getElementById("status");
+// Handle section code verification
+document.getElementById("codeForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    status.textContent = "Verifying code...";
-    status.style.color = "white";
+  const code = document.querySelector('input[name="code"]').value.trim();
+  const status = document.getElementById("status");
 
-    // 🔹 QUERY SUPABASE
-    const { data, error } = await supabase
-      .from("students")
-      .select("*")
-      .eq("section_code", code);
+  status.textContent = "Verifying code...";
+  status.style.color = "white";
 
-    if (error) {
-      status.textContent = "Server error";
-      status.style.color = "#fecaca";
-      console.error(error);
-      return;
-    }
+  // Query Supabase
+  const { data, error } = await supabase
+    .from("students")
+    .select("*")
+    .eq("section_code", code);
 
-    if (!data || data.length === 0) {
-      status.textContent = "Invalid section code";
-      status.style.color = "#fecaca";
-      return;
-    }
+  console.log("Supabase returned:", data, error);
 
-    // ✅ Success — store student
-    localStorage.setItem("student", JSON.stringify(data[0]));
+  if (error) {
+    status.textContent = "Server error";
+    status.style.color = "#fecaca";
+    return;
+  }
 
-    status.textContent = "Code verified!";
-    status.style.color = "#bbf7d0";
+  if (!data || data.length === 0) {
+    status.textContent = "Invalid section code";
+    status.style.color = "#fecaca";
+    return;
+  }
 
-    // Redirect
+  // Store first student
+  localStorage.setItem("student", JSON.stringify(data[0]));
+
+  status.textContent = "Code verified!";
+  status.style.color = "#bbf7d0";
+
+  // Redirect after 100ms
+  setTimeout(() => {
     window.location.replace("index.html");
-  });
+  }, 100);
+});
 </script>
+
 
 </body>
 </html>
