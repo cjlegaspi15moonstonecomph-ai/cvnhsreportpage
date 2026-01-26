@@ -33,52 +33,60 @@
   </div>
 
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    const supabase = createClient(
-      "https://grkromlvleczjfkrzmol.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
-    );
+  const supabase = createClient(
+    "https://grkromlvleczjfkrzmol.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0" // ✅ anon key is CORRECT here
+  );
 
-    // Handle magic link redirect
-    async function handleMagicLink() {
-      const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
-      if (data?.session) {
-        window.location.replace("/admin-dashboard.html");
-      }
-    }
-    handleMagicLink();
+  const status = document.getElementById("status");
 
-    // Check if already logged in
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) window.location.replace("/admin-dashboard.html");
+  // 1️⃣ Handle magic-link login (VERY IMPORTANT)
+  const { data: magicData, error: magicError } =
+    await supabase.auth.getSessionFromUrl({ storeSession: true });
 
-    // OTP login
-    async function sendOTP() {
-      const email = document.getElementById("email").value.trim();
-      const status = document.getElementById("status");
+  if (magicData?.session) {
+    window.location.replace("/admin-dashboard.html");
+  }
 
-      if (!email) {
-        status.textContent = "Please enter your Gmail";
-        status.className = "text-red-200 text-center mt-6 font-semibold";
-        return;
-      }
+  // 2️⃣ Already logged in? Go to dashboard
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    window.location.replace("/admin-dashboard.html");
+  }
 
-      status.textContent = "Sending OTP…";
-      status.className = "text-white text-center mt-6 font-semibold";
+  // 3️⃣ Send OTP
+  async function sendOTP() {
+    const email = document.getElementById("email").value.trim();
 
-      const { error } = await supabase.auth.signInWithOtp({ email });
-
-      if (error) {
-        status.textContent = error.message;
-        status.className = "text-red-200 text-center mt-6 font-semibold";
-      } else {
-        status.textContent = "OTP sent! Check your Gmail 📧";
-        status.className = "text-green-200 text-center mt-6 font-semibold";
-      }
+    if (!email) {
+      status.textContent = "Please enter your Gmail";
+      status.className = "text-red-200 text-center mt-6 font-semibold";
+      return;
     }
 
-    window.sendOTP = sendOTP; // make it accessible from onclick
-  </script>
+    status.textContent = "Sending OTP…";
+    status.className = "text-white text-center mt-6 font-semibold";
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.origin + "/admin-login.html"
+      }
+    });
+
+    if (error) {
+      status.textContent = error.message;
+      status.className = "text-red-200 text-center mt-6 font-semibold";
+    } else {
+      status.textContent = "OTP sent! Check your Gmail 📧";
+      status.className = "text-green-200 text-center mt-6 font-semibold";
+    }
+  }
+
+  window.sendOTP = sendOTP;
+</script>
+
 </body>
 </html>
