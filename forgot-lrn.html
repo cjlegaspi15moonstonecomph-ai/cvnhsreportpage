@@ -11,6 +11,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -111,12 +114,7 @@
     <h2>Enter Section Code</h2>
 
     <form id="codeForm">
-      <input
-        type="text"
-        name="code"
-        placeholder="Enter Section Code"
-        required
-      />
+      <input type="text" name="code" placeholder="Enter Section Code" required />
       <button type="submit">Submit</button>
       <p id="status"></p>
     </form>
@@ -125,42 +123,57 @@
   </div>
 
   <script>
-    // Back button to go back to login page
+    // ----- SUPABASE SETUP -----
+    const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co"; // replace with your project URL
+    const SUPABASE_ANON_KEY = "YOUR_ANON_KEY"; // replace with your anon key
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ----- BACK BUTTON -----
     document.getElementById("backBtn").addEventListener("click", () => {
-  window.history.back();
-});
+      window.history.back(); // safely go back to previous page
+    });
 
-
-    // Handle section code verification
+    // ----- HANDLE SECTION CODE -----
     document.getElementById("codeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const code = document.querySelector('input[name="code"]').value.trim();
       const status = document.getElementById("status");
-
       status.textContent = "Verifying code...";
       status.style.color = "white";
 
       try {
-        const res = await fetch("/api/student/verify-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code })
-        });
+        // Check if the code exists in sections table
+        const { data: sectionData, error: sectionError } = await supabase
+          .from('sections')
+          .select('*')
+          .eq('code', code)
+          .single();
 
-        const result = await res.json();
-
-        if (res.ok && result.success) {
-          // Pick first student in section for demo
-          localStorage.setItem("student", JSON.stringify(result.students[0]));
-          status.textContent = "Code verified!";
-          status.style.color = "#bbf7d0";
-          window.location.replace("/index.html");
-        } else {
-          status.textContent = result.error || "Invalid code";
+        if (sectionError || !sectionData) {
+          status.textContent = "Invalid section code";
           status.style.color = "#fecaca";
+          return;
         }
+
+        // Get all students in that section
+        const { data: studentsData, error: studentsError } = await supabase
+          .from('students')
+          .select('*')
+          .eq('section', sectionData.section);
+
+        if (studentsError || !studentsData || studentsData.length === 0) {
+          status.textContent = "No students found for this section";
+          status.style.color = "#fecaca";
+          return;
+        }
+
+        // For demo, pick the first student
+        localStorage.setItem("student", JSON.stringify(studentsData[0]));
+        status.textContent = "Code verified!";
+        status.style.color = "#bbf7d0";
+        window.location.replace("index.html"); // or student-login.html
       } catch (err) {
+        console.error(err);
         status.textContent = "Network error — cannot reach server";
         status.style.color = "#fecaca";
       }
