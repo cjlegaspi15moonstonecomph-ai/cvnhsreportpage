@@ -127,8 +127,9 @@
   <script>
     // Back button to go back to login page
     document.getElementById("backBtn").addEventListener("click", () => {
-      window.location.href = "/student-login.html";
-    });
+  window.history.back();
+});
+
 
     // Handle section code verification
     document.getElementById("codeForm").addEventListener("submit", async (e) => {
