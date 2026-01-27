@@ -29,15 +29,13 @@
     <!-- Name -->
     <div>
       <label class="font-semibold text-gray-700">Name (Optional)</label>
-      <input type="text" name="name"
-        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
+      <input type="text" name="name" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
     </div>
 
     <!-- Grade -->
     <div>
       <label class="font-semibold text-gray-700">Grade Level</label>
-      <select name="grade_level" required
-        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white">
+      <select name="grade_level" required class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white">
         <option value="">Choose</option>
         <option value="Grade 7">Grade 7</option>
         <option value="Grade 8">Grade 8</option>
@@ -51,15 +49,13 @@
     <!-- Section -->
     <div>
       <label class="font-semibold text-gray-700">Section</label>
-      <input type="text" id="desc_section" name="section" required
-        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
+      <input type="text" id="desc_section" name="section" required class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
     </div>
 
     <!-- Report Type -->
     <div>
       <label class="font-semibold text-gray-700">Report Type</label>
-      <select name="report_type" id="report_type" required
-        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white">
+      <select name="report_type" id="report_type" required class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 bg-white">
         <option value="">Choose</option>
         <option value="Bullying">Bullying</option>
         <option value="Harassment">Harassment</option>
@@ -77,8 +73,7 @@
     <!-- Other Report -->
     <div id="otherField" class="hidden">
       <label class="font-semibold text-gray-700">Please Specify</label>
-      <input type="text" id="otherInput"
-        class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
+      <input type="text" id="otherInput" class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300">
     </div>
 
     <!-- Description -->
@@ -131,8 +126,7 @@
 
     <p id="status" class="text-center font-semibold"></p>
 
-    <button type="button" id="logoutBtn"
-      class="w-full mt-3 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold">
+    <button type="button" id="logoutBtn" class="w-full mt-3 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold">
       Logout
     </button>
 
@@ -191,13 +185,8 @@ mediaInput.addEventListener("change", function () {
 // Form submit
 document.getElementById("reportForm").addEventListener("submit", async function (e) {
   e.preventDefault();
-  const form = new FormData(this);
-  const status = document.getElementById("status");
-
-  document.getElementById("reportForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-
   const form = new FormData();
+
   const status = document.getElementById("status");
 
   // Text fields
@@ -214,7 +203,7 @@ document.getElementById("reportForm").addEventListener("submit", async function 
   form.set("description_why", document.getElementById("desc_bakit").value);
   form.set("description_how", document.getElementById("desc_paano").value);
 
-  // Add media files
+  // Media files
   const mediaFiles = document.getElementById("media").files;
   for (let i = 0; i < mediaFiles.length; i++) {
     form.append("media", mediaFiles[i]);
@@ -225,33 +214,31 @@ document.getElementById("reportForm").addEventListener("submit", async function 
 
   try {
     const response = await fetch("/api/report", { method: "POST", body: form });
-
     let result;
     try {
       result = await response.json();
     } catch (jsonErr) {
       const text = await response.text();
       console.error("Invalid JSON response:", text);
-      throw jsonErr;
+      throw new Error("Server did not return valid JSON");
     }
 
     if (result.success) {
       status.textContent = "Matagumpay na naisumite ang ulat!";
       status.className = "text-green-600 font-semibold";
       this.reset();
-      document.getElementById("preview").innerHTML = "";
+      preview.innerHTML = "";
       document.getElementById("otherField").classList.add("hidden");
     } else {
-      status.textContent = "Hindi naisumite ang ulat: " + result.error;
+      status.textContent = "Hindi naisumite ang ulat: " + (result.error || "");
       status.className = "text-red-600 font-semibold";
     }
+
   } catch (err) {
     console.error(err);
     status.textContent = "May error. Subukang muli.";
     status.className = "text-red-600 font-semibold";
   }
-});
-
 });
 </script>
 
