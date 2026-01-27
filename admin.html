@@ -65,7 +65,7 @@
 
     const supabase = createClient(
       "https://grkromlvleczjfkrzmol.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+      "YOUR_ANON_KEY_HERE"
     );
 
     const logoutBtn = document.getElementById("logoutBtn");
@@ -124,27 +124,17 @@
       data.forEach(r => {
         let evidenceCell = `<span class="text-gray-400">None</span>`;
 
-        if (r.evidence) {
-          const isImage = r.evidence.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-
-          if (isImage) {
-            evidenceCell = `
-              <a href="${r.evidence}" target="_blank">
-                <img
-                  src="${r.evidence}"
-                  alt="Evidence"
-                  class="w-24 h-24 object-cover rounded-lg border hover:scale-105 transition"
-                />
-              </a>
-            `;
-          } else {
-            evidenceCell = `
-              <a href="${r.evidence}" target="_blank"
-                 class="text-blue-600 underline">
-                 View File
-              </a>
-            `;
-          }
+        if (Array.isArray(r.evidence) && r.evidence.length > 0) {
+          evidenceCell = r.evidence.map(url => {
+            const isImage = url.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+            return isImage
+              ? `<a href="${url}" target="_blank">
+                   <img src="${url}" class="w-20 h-20 object-cover rounded-lg border mb-1">
+                 </a>`
+              : `<a href="${url}" target="_blank" class="text-blue-600 underline block">
+                   View File
+                 </a>`;
+          }).join("");
         }
 
         const tr = document.createElement("tr");
@@ -153,8 +143,16 @@
           <td class="p-4">${r.grade_level ?? "-"}</td>
           <td class="p-4">${r.section ?? "-"}</td>
           <td class="p-4">${r.report_type ?? "-"}</td>
-          <td class="p-4">${r.location ?? "-"}</td>
-          <td class="p-4">${r.description ?? "-"}</td>
+          <td class="p-4">${r.description_where ?? "-"}</td>
+
+          <td class="p-4 text-sm whitespace-pre-line">
+            <strong>Sino:</strong> ${r.description_who || "-"}<br>
+            <strong>Ano:</strong> ${r.description_what || "-"}<br>
+            <strong>Kailan:</strong> ${r.description_when || "-"}<br>
+            <strong>Bakit:</strong> ${r.description_why || "-"}<br>
+            <strong>Paano:</strong> ${r.description_how || "-"}
+          </td>
+
           <td class="p-4">${evidenceCell}</td>
         `;
 
