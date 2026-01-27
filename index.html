@@ -195,16 +195,13 @@ document.getElementById("reportForm").addEventListener("submit", async function 
   const form = new FormData(this);
   const status = document.getElementById("status");
 
-  let section = document.getElementById("desc_section").value;
-  if (section === "Other") section = document.getElementById("section_other").value;
-
   const description = `
-Section: ${section}
-Sino: ${desc_sino.value}
-Ano: ${desc_ano.value}
-Kailan: ${desc_kailan.value}
-Bakit: ${desc_bakit.value}
-Paano: ${desc_paano.value}
+Saan ito nangyari?: ${document.getElementById("desc_saan").value}
+Sino ang sangkot?: ${document.getElementById("desc_sino").value}
+Ano ang nangyari?: ${document.getElementById("desc_ano").value}
+Kailan ito nangyari?: ${document.getElementById("desc_kailan").value}
+Bakit ito nangyari?: ${document.getElementById("desc_bakit").value}
+Paano ito nangyari?: ${document.getElementById("desc_paano").value}
 `;
 
   form.set("description", description);
@@ -212,25 +209,28 @@ Paano: ${desc_paano.value}
   status.textContent = "Isinusumite...";
 
   try {
-    const response = await fetch("/api/report", { method: "POST", body: form });
+    const response = await fetch("/api/report", {
+      method: "POST",
+      body: form
+    });
+
     const result = await response.json();
 
     if (result.success) {
       status.textContent = "Matagumpay na naisumite ang ulat!";
       status.className = "text-green-600 font-semibold";
       this.reset();
-      section_other.classList.add("hidden");
-      otherField.classList.add("hidden");
     } else {
       status.textContent = "Hindi naisumite ang ulat.";
       status.className = "text-red-600 font-semibold";
     }
-  } catch {
+  } catch (err) {
     status.textContent = "May error. Subukang muli.";
     status.className = "text-red-600 font-semibold";
   }
 });
 </script>
+
 
 </body>
 </html>

@@ -72,9 +72,9 @@
 
     // 🔐 Check admin session
     async function init() {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (!session || error) {
+      if (!session) {
         window.location.replace("/admin-login.html");
         return;
       }
@@ -98,7 +98,7 @@
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("Error loading reports:", error);
+        console.error(error);
         tableBody.innerHTML = `
           <tr>
             <td colspan="6" class="p-6 text-center text-red-600">
@@ -121,9 +121,30 @@
       }
 
       data.forEach(r => {
-        const evidenceHTML = r.evidence
-          ? `<a href="${r.evidence}" target="_blank" class="text-blue-600 underline">View</a>`
-          : `<span class="text-gray-400">None</span>`;
+        let evidenceCell = `<span class="text-gray-400">None</span>`;
+
+        if (r.evidence) {
+          const isImage = r.evidence.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+          if (isImage) {
+            evidenceCell = `
+              <a href="${r.evidence}" target="_blank">
+                <img
+                  src="${r.evidence}"
+                  alt="Evidence"
+                  class="w-24 h-24 object-cover rounded-lg border hover:scale-105 transition"
+                />
+              </a>
+            `;
+          } else {
+            evidenceCell = `
+              <a href="${r.evidence}" target="_blank"
+                 class="text-blue-600 underline">
+                 View File
+              </a>
+            `;
+          }
+        }
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -132,7 +153,7 @@
           <td class="p-4">${r.report_type ?? "-"}</td>
           <td class="p-4">${r.location ?? "-"}</td>
           <td class="p-4">${r.description ?? "-"}</td>
-          <td class="p-4">${evidenceHTML}</td>
+          <td class="p-4">${evidenceCell}</td>
         `;
 
         tableBody.appendChild(tr);
