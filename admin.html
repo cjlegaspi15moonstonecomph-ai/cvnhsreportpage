@@ -40,6 +40,7 @@
           <tr>
             <th class="p-4 text-left">Name</th>
             <th class="p-4 text-left">Grade</th>
+            <th class="p-4 text-left">Section</th>
             <th class="p-4 text-left">Report Type</th>
             <th class="p-4 text-left">Location</th>
             <th class="p-4 text-left">Description</th>
@@ -49,7 +50,7 @@
 
         <tbody id="reportsTable" class="divide-y divide-gray-200">
           <tr>
-            <td colspan="6" class="p-6 text-center text-gray-500">
+            <td colspan="7" class="p-6 text-center text-gray-500">
               Loading reports...
             </td>
           </tr>
@@ -101,7 +102,7 @@
         console.error(error);
         tableBody.innerHTML = `
           <tr>
-            <td colspan="6" class="p-6 text-center text-red-600">
+            <td colspan="7" class="p-6 text-center text-red-600">
               Failed to load reports
             </td>
           </tr>
@@ -112,7 +113,7 @@
       if (!data || data.length === 0) {
         tableBody.innerHTML = `
           <tr>
-            <td colspan="6" class="p-6 text-center text-gray-500">
+            <td colspan="7" class="p-6 text-center text-gray-500">
               No reports found
             </td>
           </tr>
@@ -150,6 +151,7 @@
         tr.innerHTML = `
           <td class="p-4">${r.name ?? "Anonymous"}</td>
           <td class="p-4">${r.grade_level ?? "-"}</td>
+          <td class="p-4">${r.section ?? "-"}</td>
           <td class="p-4">${r.report_type ?? "-"}</td>
           <td class="p-4">${r.location ?? "-"}</td>
           <td class="p-4">${r.description ?? "-"}</td>
