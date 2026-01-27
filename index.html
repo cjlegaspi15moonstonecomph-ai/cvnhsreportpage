@@ -194,31 +194,55 @@ document.getElementById("reportForm").addEventListener("submit", async function 
   const form = new FormData(this);
   const status = document.getElementById("status");
 
-  // Set each description field separately to match Supabase columns
-form.set("description_where", document.getElementById("desc_saan").value);
-form.set("description_who", document.getElementById("desc_sino").value);
-form.set("description_what", document.getElementById("desc_ano").value);
-form.set("description_when", document.getElementById("desc_kailan").value);
-form.set("description_why", document.getElementById("desc_bakit").value);
-form.set("description_how", document.getElementById("desc_paano").value);
+  document.getElementById("reportForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-  form.set("description", description);
+  const form = new FormData();
+  const status = document.getElementById("status");
+
+  // Text fields
+  form.set("name", this.elements["name"].value);
+  form.set("grade_level", this.elements["grade_level"].value);
+  form.set("section", this.elements["section"].value);
+  form.set("report_type", this.elements["report_type"].value);
+
+  // Description fields
+  form.set("description_where", document.getElementById("desc_saan").value);
+  form.set("description_who", document.getElementById("desc_sino").value);
+  form.set("description_what", document.getElementById("desc_ano").value);
+  form.set("description_when", document.getElementById("desc_kailan").value);
+  form.set("description_why", document.getElementById("desc_bakit").value);
+  form.set("description_how", document.getElementById("desc_paano").value);
+
+  // Add media files
+  const mediaFiles = document.getElementById("media").files;
+  for (let i = 0; i < mediaFiles.length; i++) {
+    form.append("media", mediaFiles[i]);
+  }
 
   status.textContent = "Isinusumite...";
   status.className = "text-gray-700 font-semibold";
 
   try {
     const response = await fetch("/api/report", { method: "POST", body: form });
-    const result = await response.json();
+
+    let result;
+    try {
+      result = await response.json();
+    } catch (jsonErr) {
+      const text = await response.text();
+      console.error("Invalid JSON response:", text);
+      throw jsonErr;
+    }
 
     if (result.success) {
       status.textContent = "Matagumpay na naisumite ang ulat!";
       status.className = "text-green-600 font-semibold";
       this.reset();
-      preview.innerHTML = "";
+      document.getElementById("preview").innerHTML = "";
       document.getElementById("otherField").classList.add("hidden");
     } else {
-      status.textContent = "Hindi naisumite ang ulat.";
+      status.textContent = "Hindi naisumite ang ulat: " + result.error;
       status.className = "text-red-600 font-semibold";
     }
   } catch (err) {
@@ -226,6 +250,8 @@ form.set("description_how", document.getElementById("desc_paano").value);
     status.textContent = "May error. Subukang muli.";
     status.className = "text-red-600 font-semibold";
   }
+});
+
 });
 </script>
 
