@@ -194,15 +194,14 @@ document.getElementById("reportForm").addEventListener("submit", async function 
   const form = new FormData(this);
   const status = document.getElementById("status");
 
-  // Combine all description fields
-  const description = `
-Saan ito nangyari?: ${document.getElementById("desc_saan").value}
-Sino ang sangkot?: ${document.getElementById("desc_sino").value}
-Ano ang nangyari?: ${document.getElementById("desc_ano").value}
-Kailan ito nangyari?: ${document.getElementById("desc_kailan").value}
-Bakit ito nangyari?: ${document.getElementById("desc_bakit").value}
-Paano ito nangyari?: ${document.getElementById("desc_paano").value}
-`;
+  // Set each description field separately to match Supabase columns
+form.set("description_where", document.getElementById("desc_saan").value);
+form.set("description_who", document.getElementById("desc_sino").value);
+form.set("description_what", document.getElementById("desc_ano").value);
+form.set("description_when", document.getElementById("desc_kailan").value);
+form.set("description_why", document.getElementById("desc_bakit").value);
+form.set("description_how", document.getElementById("desc_paano").value);
+
   form.set("description", description);
 
   status.textContent = "Isinusumite...";

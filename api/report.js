@@ -12,9 +12,25 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+// Helper: read file in serverless-safe way
+function fsReadFile(filepath) {
+  return new Promise((resolve, reject) => {
+    import("fs")
+      .then((fs) => {
+        fs.readFile(filepath, (err, data) => {
+          if (err) reject(err);
+          else resolve(data);
+        });
+      })
+      .catch(reject);
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false, error: "Method not allowed" });
+    return res
+      .status(405)
+      .json({ success: false, error: "Method not allowed" });
   }
 
   const form = formidable({ multiples: true });
@@ -22,21 +38,40 @@ export default async function handler(req, res) {
   form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error("Form parse error:", err);
-      return res.status(500).json({ success: false, error: "Form parse error" });
+      return res
+        .status(500)
+        .json({ success: false, error: "Form parse error" });
     }
 
     try {
-      const { name, grade_level, section, report_type, description } = fields;
+      // Extract fields
+      const {
+        name,
+        grade_level,
+        section,
+        report_type,
+        description_where,
+        description_who,
+        description_what,
+        description_when,
+        description_why,
+        description_how,
+      } = fields;
+
       const uploadedUrls = [];
 
-      // 🖼 Handle multiple files
+      // Handle multiple files
       if (files.media) {
-        const mediaFiles = Array.isArray(files.media) ? files.media : [files.media];
+        const mediaFiles = Array.isArray(files.media)
+          ? files.media
+          : [files.media];
 
         for (const file of mediaFiles) {
-          const fileData = await fsReadFile(file.filepath); // read file as buffer
+          const fileData = await fsReadFile(file.filepath); // read file
           const fileExt = file.originalFilename.split(".").pop();
-          const fileName = `report-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const fileName = `report-${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2)}.${fileExt}`;
 
           // Upload to Supabase Storage
           const { error: uploadError } = await supabase.storage
@@ -45,45 +80,44 @@ export default async function handler(req, res) {
 
           if (uploadError) {
             console.error("Upload error:", uploadError);
-            continue;
+            continue; // skip failed uploads
           }
 
-          const { data } = supabase.storage.from("evidence").getPublicUrl(fileName);
+          const { data } = supabase.storage
+            .from("evidence")
+            .getPublicUrl(fileName);
           uploadedUrls.push(data.publicUrl);
         }
       }
 
-      // Insert report
+      // Insert report into Supabase
       const { error: insertError } = await supabase.from("reports").insert({
         name: name || "Anonymous",
         grade_level,
         section,
         report_type,
-        description,
+        description_where,
+        description_who,
+        description_what,
+        description_when,
+        description_why,
+        description_how,
         evidence: uploadedUrls,
       });
 
       if (insertError) {
         console.error("Insert error:", insertError);
-        return res.status(500).json({ success: false, error: "Failed to insert report" });
+        return res
+          .status(500)
+          .json({ success: false, error: "Failed to insert report" });
       }
 
       return res.status(200).json({ success: true });
     } catch (e) {
       console.error("Server error:", e);
-      return res.status(500).json({ success: false, error: "A server error occurred" });
+      return res
+        .status(500)
+        .json({ success: false, error: "A server error occurred" });
     }
-  });
-}
-
-// Helper: read file in serverless-safe way
-function fsReadFile(filepath) {
-  return new Promise((resolve, reject) => {
-    import("fs").then(fs => {
-      fs.readFile(filepath, (err, data) => {
-        if (err) reject(err);
-        else resolve(data);
-      });
-    }).catch(reject);
   });
 }
