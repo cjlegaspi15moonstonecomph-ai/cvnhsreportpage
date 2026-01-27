@@ -65,27 +65,28 @@
 
     const supabase = createClient(
       "https://grkromlvleczjfkrzmol.supabase.co",
-      "YOUR_ANON_KEY_HERE"
+      "YOUR_ANON_KEY_HERE" // replace with your anon key
     );
 
     const logoutBtn = document.getElementById("logoutBtn");
     const tableBody = document.getElementById("reportsTable");
 
-    // 🔐 Check admin session
-    async function init() {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
+    // 🔐 Check custom admin session from localStorage
+    function checkAdminSession() {
+      const admin = JSON.parse(localStorage.getItem("admin"));
+      if (!admin || !admin.username) {
         window.location.replace("/admin-login.html");
-        return;
+        return null;
       }
-
-      loadReports();
+      return admin;
     }
 
+    const admin = checkAdminSession();
+    if (!admin) return; // redirect if not logged in
+
     // 🚪 Logout
-    logoutBtn.addEventListener("click", async () => {
-      await supabase.auth.signOut();
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("admin");
       window.location.replace("/admin-login.html");
     });
 
@@ -122,25 +123,18 @@
       }
 
       data.forEach(r => {
-        // Handle evidence (images/videos)
         let evidenceCell = `<span class="text-gray-400">None</span>`;
+
         if (Array.isArray(r.evidence) && r.evidence.length > 0) {
           evidenceCell = r.evidence.map(url => {
             const isImage = url.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-            const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
-            if (isImage) {
-              return `<a href="${url}" target="_blank">
-                        <img src="${url}" class="w-20 h-20 object-cover rounded-lg border mb-1">
-                      </a>`;
-            } else if (isVideo) {
-              return `<a href="${url}" target="_blank">
-                        <video src="${url}" class="w-32 h-20 object-cover rounded-lg border mb-1" controls></video>
-                      </a>`;
-            } else {
-              return `<a href="${url}" target="_blank" class="text-blue-600 underline block">
-                        View File
-                      </a>`;
-            }
+            return isImage
+              ? `<a href="${url}" target="_blank">
+                   <img src="${url}" class="w-20 h-20 object-cover rounded-lg border mb-1">
+                 </a>`
+              : `<a href="${url}" target="_blank" class="text-blue-600 underline block">
+                   View File
+                 </a>`;
           }).join("");
         }
 
@@ -166,7 +160,7 @@
     }
 
     // 🚀 Start
-    init();
+    loadReports();
   </script>
 </body>
 </html>
