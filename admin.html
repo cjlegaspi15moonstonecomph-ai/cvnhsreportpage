@@ -122,18 +122,25 @@
       }
 
       data.forEach(r => {
+        // Handle evidence (images/videos)
         let evidenceCell = `<span class="text-gray-400">None</span>`;
-
         if (Array.isArray(r.evidence) && r.evidence.length > 0) {
           evidenceCell = r.evidence.map(url => {
             const isImage = url.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-            return isImage
-              ? `<a href="${url}" target="_blank">
-                   <img src="${url}" class="w-20 h-20 object-cover rounded-lg border mb-1">
-                 </a>`
-              : `<a href="${url}" target="_blank" class="text-blue-600 underline block">
-                   View File
-                 </a>`;
+            const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
+            if (isImage) {
+              return `<a href="${url}" target="_blank">
+                        <img src="${url}" class="w-20 h-20 object-cover rounded-lg border mb-1">
+                      </a>`;
+            } else if (isVideo) {
+              return `<a href="${url}" target="_blank">
+                        <video src="${url}" class="w-32 h-20 object-cover rounded-lg border mb-1" controls></video>
+                      </a>`;
+            } else {
+              return `<a href="${url}" target="_blank" class="text-blue-600 underline block">
+                        View File
+                      </a>`;
+            }
           }).join("");
         }
 
@@ -144,7 +151,6 @@
           <td class="p-4">${r.section ?? "-"}</td>
           <td class="p-4">${r.report_type ?? "-"}</td>
           <td class="p-4">${r.description_where ?? "-"}</td>
-
           <td class="p-4 text-sm whitespace-pre-line">
             <strong>Sino:</strong> ${r.description_who || "-"}<br>
             <strong>Ano:</strong> ${r.description_what || "-"}<br>
@@ -152,7 +158,6 @@
             <strong>Bakit:</strong> ${r.description_why || "-"}<br>
             <strong>Paano:</strong> ${r.description_how || "-"}
           </td>
-
           <td class="p-4">${evidenceCell}</td>
         `;
 
