@@ -6,7 +6,6 @@
 <title>CVNHS Report Page</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-blue-200 flex justify-center items-center p-4">
@@ -16,12 +15,16 @@
   <!-- HEADER -->
   <div class="flex flex-col items-center mb-6">
     <img src="cvnhs-logo.png" alt="CVNHS Logo" class="w-24 h-24 mb-3"/>
-    <h2 class="text-2xl font-extrabold text-center mb-2 text-blue-700">Incident Reporting</h2>
-    <p class="text-center text-sm text-gray-600 mb-6">School Incident Reporting System</p>
+    <h2 class="text-2xl font-extrabold text-center mb-2 text-blue-700">
+      Incident Reporting
+    </h2>
+    <p class="text-center text-sm text-gray-600 mb-6">
+      School Incident Reporting System
+    </p>
     <p id="studentName" class="text-center font-semibold text-gray-700 mb-6"></p>
   </div>
 
-  <form id="reportForm" class="space-y-5">
+  <form id="reportForm" enctype="multipart/form-data" class="space-y-5">
 
     <!-- Name -->
     <div>
@@ -81,22 +84,27 @@
           <summary class="font-semibold cursor-pointer">Saan ito nangyari? ↓</summary>
           <input id="desc_saan" class="w-full mt-2 px-3 py-2 rounded-lg border">
         </details>
+
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Sino ang sangkot? ↓</summary>
           <input id="desc_sino" class="w-full mt-2 px-3 py-2 rounded-lg border">
         </details>
+
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Ano ang nangyari? ↓</summary>
           <textarea id="desc_ano" rows="3" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
         </details>
+
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Kailan ito nangyari? ↓</summary>
           <input id="desc_kailan" class="w-full mt-2 px-3 py-2 rounded-lg border">
         </details>
+
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Bakit ito nangyari? ↓</summary>
           <textarea id="desc_bakit" rows="2" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
         </details>
+
         <details class="rounded-xl border bg-gray-50 p-3">
           <summary class="font-semibold cursor-pointer">Paano ito nangyari? ↓</summary>
           <textarea id="desc_paano" rows="3" class="w-full mt-2 px-3 py-2 rounded-lg border"></textarea>
@@ -107,24 +115,25 @@
     <!-- Evidence Upload -->
     <div>
       <label class="font-semibold text-gray-700">Evidence (Images / Videos)</label>
-      <input type="file" id="media" name="media" multiple accept="image/*,video/*" class="w-full mt-1 p-2 rounded-xl border bg-white">
+      <input type="file" id="media" name="media" multiple accept="image/*,video/*"
+        class="w-full mt-1 p-2 rounded-xl border bg-white">
       <div id="preview" class="flex flex-wrap gap-2 mt-2"></div>
     </div>
 
-    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold">Submit Report</button>
+    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold">
+      Submit Report
+    </button>
+
     <p id="status" class="text-center font-semibold"></p>
-    <button type="button" id="logoutBtn" class="w-full mt-3 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold">Logout</button>
+
+    <button type="button" id="logoutBtn" class="w-full mt-3 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold">
+      Logout
+    </button>
+
   </form>
 </div>
 
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"; // client anon key
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Student login
+<script>
 const student = JSON.parse(localStorage.getItem('student'));
 if (!student) window.location.href = "/index-login.html";
 else document.getElementById('studentName').textContent = `Logged in as: ${student.name || student.lrn}`;
@@ -135,7 +144,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.replace("/index-login.html");
 });
 
-// Show Other field
+// Show Other field if report type is "Other"
 document.getElementById("report_type").addEventListener("change", function () {
   const otherField = document.getElementById("otherField");
   if (this.value === "Other") otherField.classList.remove("hidden");
@@ -145,7 +154,7 @@ document.getElementById("report_type").addEventListener("change", function () {
   }
 });
 
-// Preview files
+// Image preview
 const mediaInput = document.getElementById("media");
 const preview = document.getElementById("preview");
 mediaInput.addEventListener("change", function () {
@@ -173,76 +182,70 @@ mediaInput.addEventListener("change", function () {
   });
 });
 
-// Submit form
-document.getElementById("reportForm").addEventListener("submit", async function(e) {
+// Form submit
+document.getElementById("reportForm").addEventListener("submit", async function (e) {
   e.preventDefault();
+
+  const form = new FormData();
   const status = document.getElementById("status");
+
+  // Text fields
+  form.set("name", this.elements["name"].value);
+  form.set("grade_level", this.elements["grade_level"].value);
+  form.set("section", this.elements["section"].value);
+  form.set("report_type", this.elements["report_type"].value);
+
+  // Description fields
+  form.set("description_where", document.getElementById("desc_saan").value);
+  form.set("description_who", document.getElementById("desc_sino").value);
+  form.set("description_what", document.getElementById("desc_ano").value);
+  form.set("description_when", document.getElementById("desc_kailan").value);
+  form.set("description_why", document.getElementById("desc_bakit").value);
+  form.set("description_how", document.getElementById("desc_paano").value);
+
+  // Media files
+  const mediaFiles = document.getElementById("media").files;
+  for (let i = 0; i < mediaFiles.length; i++) {
+    form.append("media", mediaFiles[i]);
+  }
+
   status.textContent = "Isinusumite...";
   status.className = "text-gray-700 font-semibold";
 
   try {
-    const uploadedUrls = [];
+    const response = await fetch("/api/report", { method: "POST", body: form });
 
-    // Upload files directly to Supabase Storage
-    const files = mediaInput.files;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const fileExt = file.name.split(".").pop();
-      const fileName = `report-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    // Read response as text first
+    const text = await response.text();
+    let result;
 
-      const { error: uploadError } = await supabase.storage
-        .from("evidence")
-        .upload(fileName, file);
-
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        continue;
-      }
-
-      const { data } = supabase.storage.from("evidence").getPublicUrl(fileName);
-      uploadedUrls.push(data.publicUrl);
+    try {
+      result = JSON.parse(text);
+    } catch (jsonErr) {
+      console.error("Invalid JSON response from server:", text);
+      throw new Error("Server did not return valid JSON");
     }
 
-    // Prepare report data
-    const reportData = {
-      name: this.elements["name"].value || "Anonymous",
-      grade_level: this.elements["grade_level"].value,
-      section: this.elements["section"].value,
-      report_type: this.elements["report_type"].value,
-      description_where: document.getElementById("desc_saan").value,
-      description_who: document.getElementById("desc_sino").value,
-      description_what: document.getElementById("desc_ano").value,
-      description_when: document.getElementById("desc_kailan").value,
-      description_why: document.getElementById("desc_bakit").value,
-      description_how: document.getElementById("desc_paano").value,
-      evidence: uploadedUrls
-    };
-
-    // Send report to server
-    const res = await fetch("/api/report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reportData)
-    });
-
-    const result = await res.json();
     if (result.success) {
       status.textContent = "Matagumpay na naisumite ang ulat!";
       status.className = "text-green-600 font-semibold";
       this.reset();
-      preview.innerHTML = "";
+      document.getElementById("preview").innerHTML = "";
       document.getElementById("otherField").classList.add("hidden");
     } else {
-      status.textContent = "Hindi naisumite ang ulat: " + result.error;
+      status.textContent = "Hindi naisumite ang ulat: " + (result.error || "");
       status.className = "text-red-600 font-semibold";
     }
 
-  } catch(err) {
+  } catch (err) {
     console.error(err);
     status.textContent = "May error. Subukang muli.";
     status.className = "text-red-600 font-semibold";
   }
 });
+
+
 </script>
+
 </body>
 </html>
