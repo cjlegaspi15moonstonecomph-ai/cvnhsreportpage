@@ -10,14 +10,17 @@
 
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    body { font-family: 'Inter', system-ui, sans-serif; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+    }
   </style>
 </head>
 
 <body class="min-h-screen bg-gray-100 p-6">
 
-  <div class="max-w-6xl mx-auto">
+  <div class="max-w-7xl mx-auto">
 
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
@@ -31,7 +34,7 @@
     </div>
 
     <!-- Reports Table -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg overflow-x-auto">
       <table class="min-w-full">
         <thead class="bg-blue-600 text-white">
           <tr>
@@ -40,11 +43,13 @@
             <th class="p-4 text-left">Report Type</th>
             <th class="p-4 text-left">Location</th>
             <th class="p-4 text-left">Description</th>
+            <th class="p-4 text-left">Evidence</th>
           </tr>
         </thead>
+
         <tbody id="reportsTable" class="divide-y divide-gray-200">
           <tr>
-            <td colspan="5" class="p-6 text-center text-gray-500">
+            <td colspan="6" class="p-6 text-center text-gray-500">
               Loading reports...
             </td>
           </tr>
@@ -67,9 +72,9 @@
 
     // 🔐 Check admin session
     async function init() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (!session) {
+      if (!session || error) {
         window.location.replace("/admin-login.html");
         return;
       }
@@ -83,7 +88,7 @@
       window.location.replace("/admin-login.html");
     });
 
-    // 📥 Load reports from Supabase
+    // 📥 Load reports
     async function loadReports() {
       tableBody.innerHTML = "";
 
@@ -93,10 +98,10 @@
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error(error);
+        console.error("Error loading reports:", error);
         tableBody.innerHTML = `
           <tr>
-            <td colspan="5" class="p-6 text-center text-red-600">
+            <td colspan="6" class="p-6 text-center text-red-600">
               Failed to load reports
             </td>
           </tr>
@@ -107,7 +112,7 @@
       if (!data || data.length === 0) {
         tableBody.innerHTML = `
           <tr>
-            <td colspan="5" class="p-6 text-center text-gray-500">
+            <td colspan="6" class="p-6 text-center text-gray-500">
               No reports found
             </td>
           </tr>
@@ -116,6 +121,10 @@
       }
 
       data.forEach(r => {
+        const evidenceHTML = r.evidence
+          ? `<a href="${r.evidence}" target="_blank" class="text-blue-600 underline">View</a>`
+          : `<span class="text-gray-400">None</span>`;
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td class="p-4">${r.name ?? "Anonymous"}</td>
@@ -123,12 +132,14 @@
           <td class="p-4">${r.report_type ?? "-"}</td>
           <td class="p-4">${r.location ?? "-"}</td>
           <td class="p-4">${r.description ?? "-"}</td>
+          <td class="p-4">${evidenceHTML}</td>
         `;
+
         tableBody.appendChild(tr);
       });
     }
 
-    // 🚀 Start dashboard
+    // 🚀 Start
     init();
   </script>
 </body>
