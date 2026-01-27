@@ -214,11 +214,14 @@ document.getElementById("reportForm").addEventListener("submit", async function 
 
   try {
     const response = await fetch("/api/report", { method: "POST", body: form });
+
+    // Read response as text first
+    const text = await response.text();
+
     let result;
     try {
-      result = await response.json();
+      result = JSON.parse(text);
     } catch (jsonErr) {
-      const text = await response.text();
       console.error("Invalid JSON response:", text);
       throw new Error("Server did not return valid JSON");
     }
@@ -227,7 +230,7 @@ document.getElementById("reportForm").addEventListener("submit", async function 
       status.textContent = "Matagumpay na naisumite ang ulat!";
       status.className = "text-green-600 font-semibold";
       this.reset();
-      preview.innerHTML = "";
+      document.getElementById("preview").innerHTML = "";
       document.getElementById("otherField").classList.add("hidden");
     } else {
       status.textContent = "Hindi naisumite ang ulat: " + (result.error || "");
@@ -240,6 +243,7 @@ document.getElementById("reportForm").addEventListener("submit", async function 
     status.className = "text-red-600 font-semibold";
   }
 });
+
 </script>
 
 </body>
