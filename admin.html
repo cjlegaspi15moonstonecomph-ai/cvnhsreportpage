@@ -71,24 +71,24 @@
     const logoutBtn = document.getElementById("logoutBtn");
     const tableBody = document.getElementById("reportsTable");
 
-    // 🔐 Check custom admin session from localStorage
-    function checkAdminSession() {
+    // 🔐 Load admin dashboard
+    async function initDashboard() {
+      // Check admin session from localStorage
       const admin = JSON.parse(localStorage.getItem("admin"));
       if (!admin || !admin.username) {
         window.location.replace("/admin-login.html");
-        return null;
+        return; // safely stop execution
       }
-      return admin;
+
+      // Logout button
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("admin");
+        window.location.replace("/admin-login.html");
+      });
+
+      // Load reports
+      await loadReports();
     }
-
-    const admin = checkAdminSession();
-    if (!admin) return; // redirect if not logged in
-
-    // 🚪 Logout
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("admin");
-      window.location.replace("/admin-login.html");
-    });
 
     // 📥 Load reports
     async function loadReports() {
@@ -160,7 +160,7 @@
     }
 
     // 🚀 Start
-    loadReports();
+    initDashboard();
   </script>
 </body>
 </html>
