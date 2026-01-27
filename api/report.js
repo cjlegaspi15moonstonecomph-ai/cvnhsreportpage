@@ -22,22 +22,19 @@ export default async function handler(req, res) {
 
   form.parse(req, async (err, fields, files) => {
     if (err) {
-      console.error(err);
+      console.error("Form parse error:", err);
       return res.status(500).json({ success: false });
     }
 
     try {
-      const {
-        name,
-        grade_level,
-        section,
-        report_type,
-        description,
-      } = fields;
+      const name = fields.name || "Anonymous";
+      const grade_level = fields.grade_level;
+      const section = fields.location; // <-- FIXED: map location to section
+      const report_type = fields.report_type;
+      const description = fields.description;
 
       const uploadedUrls = [];
 
-      // 🖼 Handle multiple files
       if (files.media) {
         const mediaFiles = Array.isArray(files.media)
           ? files.media
@@ -57,7 +54,7 @@ export default async function handler(req, res) {
             });
 
           if (uploadError) {
-            console.error(uploadError);
+            console.error("Upload error:", uploadError);
             continue;
           }
 
@@ -69,11 +66,10 @@ export default async function handler(req, res) {
         }
       }
 
-      // 📝 Insert report
       const { error: insertError } = await supabase
         .from("reports")
         .insert({
-          name: name || "Anonymous",
+          name,
           grade_level,
           section,
           report_type,
@@ -82,14 +78,14 @@ export default async function handler(req, res) {
         });
 
       if (insertError) {
-        console.error(insertError);
-        return res.status(500).json({ success: false });
+        console.error("Supabase insert error:", insertError);
+        return res.status(500).json({ success: false, error: insertError.message });
       }
 
       res.status(200).json({ success: true });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ success: false });
+      console.error("Handler error:", e);
+      res.status(500).json({ success: false, error: e.message });
     }
   });
 }
