@@ -154,12 +154,14 @@ document.getElementById("reportForm").addEventListener("submit", async function(
   status.textContent = "Isinusumite...";
   status.className = "text-gray-700 font-semibold";
 
-  const session = supabase.auth.session();
-  if (!session) {
-    status.textContent = "Hindi ka naka-login.";
-    status.className = "text-red-600 font-semibold";
-    return;
-  }
+  const { data: { session } } = await supabase.auth.getSession();
+if (!session) {
+  status.textContent = "Hindi ka naka-login.";
+  status.className = "text-red-600 font-semibold";
+  return;
+}
+form.set("token", session.access_token);
+
 
   const form = new FormData();
   form.set("token", session.access_token); // send auth token
