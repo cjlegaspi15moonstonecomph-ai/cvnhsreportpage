@@ -131,9 +131,10 @@
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+// Initialize Supabase
 const supabase = createClient(
-  "https://grkromlvleczjfkrzmol.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+  "https://grkromlvleczjfkrzmol.supabase.co", // <-- your Supabase URL
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0" // <-- your anon key
 );
 
 const student = JSON.parse(localStorage.getItem('student'));
@@ -146,58 +147,119 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.replace("/index-login.html");
 });
 
-// Image preview code here...
+// Show Other field if report type is "Other"
+document.getElementById("report_type").addEventListener("change", function () {
+  const otherField = document.getElementById("otherField");
+  if (this.value === "Other") otherField.classList.remove("hidden");
+  else {
+    otherField.classList.add("hidden");
+    document.getElementById("otherInput").value = "";
+  }
+});
 
-document.getElementById("reportForm").addEventListener("submit", async function(e){
+// Image/Video preview
+const mediaInput = document.getElementById("media");
+const preview = document.getElementById("preview");
+mediaInput.addEventListener("change", function () {
+  preview.innerHTML = "";
+  Array.from(this.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement("div");
+      div.className = "w-24 h-24 border rounded-lg overflow-hidden";
+      if(file.type.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.className = "w-full h-full object-cover";
+        div.appendChild(img);
+      } else if(file.type.startsWith("video/")) {
+        const video = document.createElement("video");
+        video.src = e.target.result;
+        video.controls = true;
+        video.className = "w-full h-full object-cover";
+        div.appendChild(video);
+      }
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+// Form submit
+document.getElementById("reportForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   const status = document.getElementById("status");
   status.textContent = "Isinusumite...";
   status.className = "text-gray-700 font-semibold";
 
-  const { data: { session } } = await supabase.auth.getSession();
-if (!session) {
-  status.textContent = "Hindi ka naka-login.";
-  status.className = "text-red-600 font-semibold";
-  return;
-}
-form.set("token", session.access_token);
-
-
-  const form = new FormData();
-  form.set("token", session.access_token); // send auth token
-  form.set("name", this.elements["name"].value);
-  form.set("grade_level", this.elements["grade_level"].value);
-  form.set("section", this.elements["section"].value);
-  form.set("report_type", this.elements["report_type"].value);
-  form.set("description_where", document.getElementById("desc_saan").value);
-  form.set("description_who", document.getElementById("desc_sino").value);
-  form.set("description_what", document.getElementById("desc_ano").value);
-  form.set("description_when", document.getElementById("desc_kailan").value);
-  form.set("description_why", document.getElementById("desc_bakit").value);
-  form.set("description_how", document.getElementById("desc_paano").value);
-
-  const mediaFiles = document.getElementById("media").files;
-  for (let i=0;i<mediaFiles.length;i++) form.append("media", mediaFiles[i]);
-
   try {
-    const res = await fetch("/api/report", { method: "POST", body: form });
-    const result = await res.json();
-    if (result.success) {
-      status.textContent = "Matagumpay na naisumite ang ulat!";
-      status.className = "text-green-600 font-semibold";
-      this.reset();
-      document.getElementById("preview").innerHTML = "";
-    } else {
-      status.textContent = "Hindi naisumite ang ulat: " + result.error;
+    // ✅ Check session (Supabase v2)
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      status.textContent = "Hindi ka naka-login.";
       status.className = "text-red-600 font-semibold";
+      return;
     }
-  } catch(err) {
+
+    // 1️⃣ Upload media files
+    const uploadedUrls = [];
+    for (let file of mediaInput.files) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `report-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from("evidence")
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        continue;
+      }
+
+      const publicUrl = supabase.storage.from("evidence").getPublicUrl(fileName).data.publicUrl;
+      uploadedUrls.push(publicUrl);
+    }
+
+    // 2️⃣ Prepare report data
+    const reportData = {
+      name: this.elements["name"].value || "Anonymous",
+      grade_level: this.elements["grade_level"].value,
+      section: this.elements["section"].value,
+      report_type: this.elements["report_type"].value,
+      description_where: document.getElementById("desc_saan").value,
+      description_who: document.getElementById("desc_sino").value,
+      description_what: document.getElementById("desc_ano").value,
+      description_when: document.getElementById("desc_kailan").value,
+      description_why: document.getElementById("desc_bakit").value,
+      description_how: document.getElementById("desc_paano").value,
+      evidence: uploadedUrls,
+      user_id: session.user.id // associate report with authenticated user
+    };
+
+    // 3️⃣ Insert report directly into Supabase table
+    const { error: insertError } = await supabase.from("reports").insert([reportData]);
+    if (insertError) {
+      console.error("Insert error:", insertError);
+      status.textContent = "Hindi naisumite ang ulat: " + insertError.message;
+      status.className = "text-red-600 font-semibold";
+      return;
+    }
+
+    // 4️⃣ Success
+    status.textContent = "Matagumpay na naisumite ang ulat!";
+    status.className = "text-green-600 font-semibold";
+    this.reset();
+    preview.innerHTML = "";
+    document.getElementById("otherField").classList.add("hidden");
+
+  } catch (err) {
     console.error(err);
     status.textContent = "May error. Subukang muli.";
     status.className = "text-red-600 font-semibold";
   }
 });
 </script>
+
 
 
 </body>
