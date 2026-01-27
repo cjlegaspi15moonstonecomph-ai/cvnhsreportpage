@@ -233,7 +233,7 @@ document.getElementById("reportForm").addEventListener("submit", async function(
       description_why: document.getElementById("desc_bakit").value,
       description_how: document.getElementById("desc_paano").value,
       evidence: uploadedUrls,
-      user_id: session.user.id // associate report with authenticated user
+      user_id: null  // since not using Supabase Auth
     };
 
     // 3️⃣ Insert report directly into Supabase table
