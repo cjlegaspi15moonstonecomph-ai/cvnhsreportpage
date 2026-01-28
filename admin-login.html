@@ -39,7 +39,6 @@
     <p id="status" class="text-center font-semibold mt-6 text-sm text-white"></p>
   </div>
 
-<!-- unchanged UI -->
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -51,14 +50,25 @@ const supabase = createClient(
 const status = document.getElementById("status");
 const emailInput = document.getElementById("email");
 
-async function init() {
-  // Check if already logged in
+/* ✅ 1. Check existing session */
+async function checkSession() {
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) window.location.replace("/admin.html");
+  if (session) {
+    window.location.replace("/admin.html");
+  }
 }
 
+/* ✅ 2. VERY IMPORTANT: Listen for magic-link login */
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_IN" && session) {
+    window.location.replace("/admin.html");
+  }
+});
+
+/* ✅ 3. Send magic link */
 async function sendOTP() {
   const email = emailInput.value.trim();
+
   if (!email) {
     status.textContent = "Please enter your Gmail";
     status.className = "text-red-200 text-center mt-6 font-semibold";
@@ -72,7 +82,7 @@ async function sendOTP() {
     email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: window.location.origin + "/admin.html" // redirect to dashboard
+      emailRedirectTo: window.location.origin + "/admin.html"
     }
   });
 
@@ -85,10 +95,9 @@ async function sendOTP() {
   }
 }
 
-init();
+checkSession();
 document.getElementById("sendOTPBtn").addEventListener("click", sendOTP);
 </script>
-
 
 </body>
 </html>
