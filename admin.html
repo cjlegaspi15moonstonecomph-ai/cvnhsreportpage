@@ -65,136 +65,124 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(
   "https://grkromlvleczjfkrzmol.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+  "YOUR_ANON_KEY"
 );
 
-/* ✅ Protect page */
+/* 🔗 DOM ELEMENTS (FIX #2) */
+const logoutBtn = document.getElementById("logoutBtn");
+const tableBody = document.getElementById("tableBody");
+
+/* 🔒 PROTECT PAGE */
 async function protectPage() {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
-    // Wait for magic-link session
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
-        location.reload(); // reload once session is ready
+        location.reload();
       }
     });
 
-    // Still no session → redirect after delay
     setTimeout(() => {
       window.location.replace("/admin-login.html");
     }, 1500);
+
+    return;
   }
+
+  // ✅ Session exists → load reports
+  loadReports();
 }
 
 protectPage();
 
-    // 🚪 LOGOUT
-    logoutBtn.addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      window.location.replace("/admin-login.html");
-    });
+/* 🚪 LOGOUT */
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  window.location.replace("/admin-login.html");
+});
 
-    // 📥 LOAD REPORTS
-    async function loadReports() {
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="7" class="p-6 text-center text-gray-500">
-            Loading reports...
-          </td>
-        </tr>
-      `;
+/* 📥 LOAD REPORTS */
+async function loadReports() {
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="7" class="p-6 text-center text-gray-500">
+        Loading reports...
+      </td>
+    </tr>
+  `;
 
-      const { data, error } = await supabase
-        .from("reports")
-        .select("*")
-        .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("reports")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error(error);
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="7" class="p-6 text-center text-red-600">
-              Failed to load reports
-            </td>
-          </tr>
-        `;
-        return;
-      }
+  if (error) {
+    console.error(error);
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="p-6 text-center text-red-600">
+          Failed to load reports
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
-      if (!data || data.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="7" class="p-6 text-center text-gray-500">
-              No reports found
-            </td>
-          </tr>
-        `;
-        return;
-      }
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="p-6 text-center text-gray-500">
+          No reports found
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
-      tableBody.innerHTML = "";
+  tableBody.innerHTML = "";
 
-      data.forEach(r => {
-        // Evidence handling (array)
-        let evidenceHTML = `<span class="text-gray-400">None</span>`;
+  data.forEach(r => {
+    let evidenceHTML = `<span class="text-gray-400">None</span>`;
 
-        if (Array.isArray(r.evidence) && r.evidence.length > 0) {
-          evidenceHTML = r.evidence.map(url => {
-            const isImage = url.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-            const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
-
-            if (isImage) {
-              return `
-                <a href="${url}" target="_blank">
-                  <img src="${url}"
-                    class="w-20 h-20 object-cover rounded-lg border mb-2 hover:scale-105 transition">
-                </a>
-              `;
-            }
-
-            if (isVideo) {
-              return `
-                <video src="${url}" controls
-                  class="w-32 rounded-lg border mb-2"></video>
-              `;
-            }
-
-            return `
-              <a href="${url}" target="_blank"
-                class="text-blue-600 underline block mb-1">
-                View File
-              </a>
-            `;
-          }).join("");
+    if (Array.isArray(r.evidence) && r.evidence.length > 0) {
+      evidenceHTML = r.evidence.map(url => {
+        if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+          return `<a href="${url}" target="_blank">
+            <img src="${url}" class="w-20 h-20 object-cover rounded-lg border mb-2">
+          </a>`;
         }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="p-4">${r.name ?? "Anonymous"}</td>
-          <td class="p-4">${r.grade_level ?? "-"}</td>
-          <td class="p-4">${r.section ?? "-"}</td>
-          <td class="p-4">${r.report_type ?? "-"}</td>
-          <td class="p-4">${r.description_where ?? "-"}</td>
+        if (url.match(/\.(mp4|webm|ogg)$/i)) {
+          return `<video src="${url}" controls class="w-32 rounded-lg border mb-2"></video>`;
+        }
 
-          <td class="p-4 text-sm whitespace-pre-line">
-            <strong>Sino:</strong> ${r.description_who || "-"}<br>
-            <strong>Ano:</strong> ${r.description_what || "-"}<br>
-            <strong>Kailan:</strong> ${r.description_when || "-"}<br>
-            <strong>Bakit:</strong> ${r.description_why || "-"}<br>
-            <strong>Paano:</strong> ${r.description_how || "-"}
-          </td>
-
-          <td class="p-4">${evidenceHTML}</td>
-        `;
-
-        tableBody.appendChild(tr);
-      });
+        return `<a href="${url}" target="_blank" class="text-blue-600 underline">View File</a>`;
+      }).join("");
     }
 
-    // 🚀 START
-    init();
-  </script>
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="p-4">${r.name ?? "Anonymous"}</td>
+      <td class="p-4">${r.grade_level ?? "-"}</td>
+      <td class="p-4">${r.section ?? "-"}</td>
+      <td class="p-4">${r.report_type ?? "-"}</td>
+      <td class="p-4">${r.description_where ?? "-"}</td>
+      <td class="p-4 text-sm whitespace-pre-line">
+        <strong>Sino:</strong> ${r.description_who || "-"}<br>
+        <strong>Ano:</strong> ${r.description_what || "-"}<br>
+        <strong>Kailan:</strong> ${r.description_when || "-"}<br>
+        <strong>Bakit:</strong> ${r.description_why || "-"}<br>
+        <strong>Paano:</strong> ${r.description_how || "-"}
+      </td>
+      <td class="p-4">${evidenceHTML}</td>
+    `;
+
+    tableBody.appendChild(tr);
+  });
+}
+</script>
+
 
 </body>
 </html>
