@@ -65,34 +65,39 @@
 
     const supabase = createClient(
       "https://grkromlvleczjfkrzmol.supabase.co",
-      "YOUR_ANON_KEY_HERE" // replace with your anon key
+      "YOUR_ANON_KEY_HERE"
     );
 
     const logoutBtn = document.getElementById("logoutBtn");
     const tableBody = document.getElementById("reportsTable");
 
-    // 🔐 Load admin dashboard
-    async function initDashboard() {
-      // Check admin session from localStorage
-      const admin = JSON.parse(localStorage.getItem("admin"));
-      if (!admin || !admin.username) {
+    // 🔐 CHECK AUTH SESSION (CORRECT WAY)
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
         window.location.replace("/admin-login.html");
-        return; // safely stop execution
+        return;
       }
 
-      // Logout button
-      logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("admin");
-        window.location.replace("/admin-login.html");
-      });
-
-      // Load reports
-      await loadReports();
+      loadReports();
     }
 
-    // 📥 Load reports
+    // 🚪 LOGOUT
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      window.location.replace("/admin-login.html");
+    });
+
+    // 📥 LOAD REPORTS
     async function loadReports() {
-      tableBody.innerHTML = "";
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="p-6 text-center text-gray-500">
+            Loading reports...
+          </td>
+        </tr>
+      `;
 
       const { data, error } = await supabase
         .from("reports")
@@ -122,19 +127,39 @@
         return;
       }
 
+      tableBody.innerHTML = "";
+
       data.forEach(r => {
-        let evidenceCell = `<span class="text-gray-400">None</span>`;
+        // Evidence handling (array)
+        let evidenceHTML = `<span class="text-gray-400">None</span>`;
 
         if (Array.isArray(r.evidence) && r.evidence.length > 0) {
-          evidenceCell = r.evidence.map(url => {
+          evidenceHTML = r.evidence.map(url => {
             const isImage = url.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-            return isImage
-              ? `<a href="${url}" target="_blank">
-                   <img src="${url}" class="w-20 h-20 object-cover rounded-lg border mb-1">
-                 </a>`
-              : `<a href="${url}" target="_blank" class="text-blue-600 underline block">
-                   View File
-                 </a>`;
+            const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
+
+            if (isImage) {
+              return `
+                <a href="${url}" target="_blank">
+                  <img src="${url}"
+                    class="w-20 h-20 object-cover rounded-lg border mb-2 hover:scale-105 transition">
+                </a>
+              `;
+            }
+
+            if (isVideo) {
+              return `
+                <video src="${url}" controls
+                  class="w-32 rounded-lg border mb-2"></video>
+              `;
+            }
+
+            return `
+              <a href="${url}" target="_blank"
+                class="text-blue-600 underline block mb-1">
+                View File
+              </a>
+            `;
           }).join("");
         }
 
@@ -145,6 +170,7 @@
           <td class="p-4">${r.section ?? "-"}</td>
           <td class="p-4">${r.report_type ?? "-"}</td>
           <td class="p-4">${r.description_where ?? "-"}</td>
+
           <td class="p-4 text-sm whitespace-pre-line">
             <strong>Sino:</strong> ${r.description_who || "-"}<br>
             <strong>Ano:</strong> ${r.description_what || "-"}<br>
@@ -152,15 +178,17 @@
             <strong>Bakit:</strong> ${r.description_why || "-"}<br>
             <strong>Paano:</strong> ${r.description_how || "-"}
           </td>
-          <td class="p-4">${evidenceCell}</td>
+
+          <td class="p-4">${evidenceHTML}</td>
         `;
 
         tableBody.appendChild(tr);
       });
     }
 
-    // 🚀 Start
-    initDashboard();
+    // 🚀 START
+    init();
   </script>
+
 </body>
 </html>
