@@ -61,27 +61,33 @@
 
   <!-- Supabase -->
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    const supabase = createClient(
-      "https://grkromlvleczjfkrzmol.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
-    );
+const supabase = createClient(
+  "https://grkromlvleczjfkrzmol.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+);
 
-    const logoutBtn = document.getElementById("logoutBtn");
-    const tableBody = document.getElementById("reportsTable");
+/* ✅ Protect page */
+async function protectPage() {
+  const { data: { session } } = await supabase.auth.getSession();
 
-    // 🔐 CHECK AUTH SESSION (CORRECT WAY)
-    async function init() {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        window.location.replace("/admin-login.html");
-        return;
+  if (!session) {
+    // Wait for magic-link session
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        location.reload(); // reload once session is ready
       }
+    });
 
-      loadReports();
-    }
+    // Still no session → redirect after delay
+    setTimeout(() => {
+      window.location.replace("/admin-login.html");
+    }, 1500);
+  }
+}
+
+protectPage();
 
     // 🚪 LOGOUT
     logoutBtn.addEventListener("click", async () => {
