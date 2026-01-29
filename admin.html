@@ -97,41 +97,34 @@ protectPage();
 
     // 📥 LOAD REPORTS
     async function loadReports() {
-      tableBody.innerHTML = `
-        <tr>
-          <td colspan="7" class="p-6 text-center text-gray-500">
-            Loading reports...
-          </td>
-        </tr>
-      `;
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="7" class="p-6 text-center text-gray-500">
+        Loading reports...
+      </td>
+    </tr>
+  `;
 
-      const { data, error } = await supabase
-        .from("reports")
-        .select("*")
-        .order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("reports")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error(error);
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="7" class="p-6 text-center text-red-600">
-              Failed to load reports
-            </td>
-          </tr>
-        `;
-        return;
-      }
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
 
-      if (!data || data.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="7" class="p-6 text-center text-gray-500">
-              No reports found
-            </td>
-          </tr>
-        `;
-        return;
-      }
+  if (error) {
+    console.error(error);
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="p-6 text-center text-red-600">
+          Failed to load reports
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
 
       tableBody.innerHTML = "";
 
