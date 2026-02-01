@@ -194,7 +194,7 @@ mediaInput.addEventListener("change", function () {
 document.getElementById("reportForm").addEventListener("submit", async function (e) {
   e.preventDefault();
   const status = document.getElementById("status");
-  status.textContent = "Isinusumite...";
+  status.textContent = "Submitting...";
   status.className = "text-gray-700 font-semibold";
 
   try {
@@ -243,13 +243,13 @@ document.getElementById("reportForm").addEventListener("submit", async function 
 
     if (error) {
       console.error(error);
-      status.textContent = "Hindi naisumite ang ulat: " + error.message;
+      status.textContent = "Report not submitted:" + error.message;
       status.className = "text-red-600 font-semibold";
       return;
     }
 
     // 3️⃣ Success
-    status.textContent = "Matagumpay na naisumite ang ulat!";
+    status.textContent = "Submit Successfully!";
     status.className = "text-green-600 font-semibold";
     this.reset();
     preview.innerHTML = "";
@@ -257,7 +257,7 @@ document.getElementById("reportForm").addEventListener("submit", async function 
 
   } catch (err) {
     console.error(err);
-    status.textContent = "May error. Subukang muli.";
+    status.textContent = "There was an error. Please try again.";
     status.className = "text-red-600 font-semibold";
   }
 });
