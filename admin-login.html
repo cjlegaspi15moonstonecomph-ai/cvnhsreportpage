@@ -75,7 +75,7 @@ async function sendOTP() {
     return;
   }
 
-  status.textContent = "Sending magic link…";
+  status.textContent = "Sending Link…";
   status.className = "text-white text-center mt-6 font-semibold";
 
   const { error } = await supabase.auth.signInWithOtp({
@@ -90,7 +90,7 @@ async function sendOTP() {
     status.textContent = error.message;
     status.className = "text-red-200 text-center mt-6 font-semibold";
   } else {
-    status.textContent = "Check your Gmail 📧 (Inbox or Spam)";
+    status.textContent = "Check your Gmail";
     status.className = "text-green-200 text-center mt-6 font-semibold";
   }
 }
