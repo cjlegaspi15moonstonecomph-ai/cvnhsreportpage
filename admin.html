@@ -229,7 +229,7 @@
 
       // Delete report from database
       const { error } = await supabase
-        .from("evidence")
+        .from("reports")
         .delete()
         .eq("id", id);
 
