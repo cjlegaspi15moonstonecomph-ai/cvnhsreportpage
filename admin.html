@@ -17,11 +17,9 @@
     }
   </style>
 </head>
-
 <body class="min-h-screen bg-gray-100 p-6">
 
   <div class="max-w-7xl mx-auto">
-
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
@@ -45,12 +43,13 @@
             <th class="p-4 text-left">Location</th>
             <th class="p-4 text-left">Description</th>
             <th class="p-4 text-left">Evidence</th>
+            <th class="p-4 text-left">Actions</th> <!-- NEW COLUMN -->
           </tr>
         </thead>
 
         <tbody id="reportsTable" class="divide-y divide-gray-200">
           <tr>
-            <td colspan="7" class="p-6 text-center text-gray-500">
+            <td colspan="8" class="p-6 text-center text-gray-500">
               Loading reports...
             </td>
           </tr>
@@ -118,7 +117,7 @@
     async function loadReports() {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="7" class="p-6 text-center text-gray-500">
+          <td colspan="8" class="p-6 text-center text-gray-500">
             Loading reports...
           </td>
         </tr>
@@ -133,7 +132,7 @@
         console.error(error);
         tableBody.innerHTML = `
           <tr>
-            <td colspan="7" class="p-6 text-center text-red-600">
+            <td colspan="8" class="p-6 text-center text-red-600">
               Failed to load reports
             </td>
           </tr>
@@ -144,7 +143,7 @@
       if (!data || data.length === 0) {
         tableBody.innerHTML = `
           <tr>
-            <td colspan="7" class="p-6 text-center text-gray-500">
+            <td colspan="8" class="p-6 text-center text-gray-500">
               No reports found
             </td>
           </tr>
@@ -195,10 +194,33 @@
             <strong>Paano:</strong> ${r.description_how || "-"}
           </td>
           <td class="p-4">${evidenceHTML}</td>
+          <td class="p-4">
+            <button onclick="deleteReport('${r.id}')" 
+              class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">
+              Delete
+            </button>
+          </td>
         `;
         tableBody.appendChild(tr);
       });
     }
+
+    /* 🗑 DELETE REPORT */
+    window.deleteReport = async function(id) {
+      if (!confirm("Are you sure you want to delete this report?")) return;
+
+      const { error } = await supabase
+        .from("reports")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        alert("Failed to delete report: " + error.message);
+        return;
+      }
+
+      loadReports();
+    };
 
     /* 🔍 PREVIEW LOGIC (ADDED) */
     const previewModal = document.getElementById("previewModal");
@@ -238,6 +260,5 @@
     /* 🚀 START */
     protectPage();
   </script>
-
 </body>
 </html>
