@@ -3,101 +3,209 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login</title>
+  <title>Admin Dashboard</title>
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    body { font-family: 'Inter', system-ui, sans-serif; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+    }
   </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 p-6">
+<body class="min-h-screen bg-gray-100 p-6">
 
-  <div class="w-full max-w-md backdrop-blur-xl bg-white/20 border border-white/30 rounded-3xl shadow-2xl p-8">
+  <div class="max-w-7xl mx-auto">
 
-    <h2 class="text-3xl font-bold text-white text-center mb-2">Admin Access</h2>
-    <p class="text-center text-white/80 text-sm mb-8">
-      Sign in using your authorized Gmail account
-    </p>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+      <button
+        id="logoutBtn"
+        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+      >
+        Logout
+      </button>
+    </div>
 
-    <input
-      type="email"
-      id="email"
-      placeholder="admin@gmail.com"
-      class="w-full bg-white/90 text-gray-800 p-4 rounded-xl outline-none focus:ring-4 focus:ring-white/40 transition mb-6"
-    />
+    <!-- Reports Table -->
+    <div class="bg-white rounded-xl shadow-lg overflow-x-auto">
+      <table class="min-w-full">
+        <thead class="bg-blue-600 text-white">
+          <tr>
+            <th class="p-4 text-left">Name</th>
+            <th class="p-4 text-left">Grade</th>
+            <th class="p-4 text-left">Section</th>
+            <th class="p-4 text-left">Report Type</th>
+            <th class="p-4 text-left">Location</th>
+            <th class="p-4 text-left">Description</th>
+            <th class="p-4 text-left">Evidence</th>
+            <th class="p-4 text-left">Action</th> <!-- 🔴 ADDED -->
+          </tr>
+        </thead>
 
-    <button
-      id="sendOTPBtn"
-      class="w-full bg-white text-blue-700 font-semibold py-4 rounded-xl hover:bg-blue-50 active:scale-[0.98] transition"
-    >
-      Send
-    </button>
-
-    <p id="status" class="text-center font-semibold mt-6 text-sm text-white"></p>
+        <tbody id="reportsTable" class="divide-y divide-gray-200">
+          <tr>
+            <td colspan="8" class="p-6 text-center text-gray-500">
+              Loading reports...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  <!-- 🔍 PREVIEW MODAL -->
+  <div id="previewModal"
+    class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
 
-const supabase = createClient(
-  "https://grkromlvleczjfkrzmol.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
-);
+    <div class="bg-white rounded-xl p-4 max-w-3xl w-full relative">
+      <button id="closePreview"
+        class="absolute top-3 right-3 text-gray-600 hover:text-black text-xl font-bold">
+        ✕
+      </button>
 
-const status = document.getElementById("status");
-const emailInput = document.getElementById("email");
+      <div id="previewContent" class="flex justify-center items-center"></div>
+    </div>
+  </div>
 
-/* ✅ 1. Check existing session */
-async function checkSession() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    window.location.replace("/admin.html");
-  }
-}
+  <!-- Supabase -->
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-/* ✅ 2. VERY IMPORTANT: Listen for magic-link login */
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event === "SIGNED_IN" && session) {
-    window.location.replace("/admin.html");
-  }
-});
+    const supabase = createClient(
+      "https://grkromlvleczjfkrzmol.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+    );
 
-/* ✅ 3. Send magic link */
-async function sendOTP() {
-  const email = emailInput.value.trim();
+    const tableBody = document.getElementById("reportsTable");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-  if (!email) {
-    status.textContent = "Please enter your Gmail";
-    status.className = "text-red-200 text-center mt-6 font-semibold";
-    return;
-  }
+    async function protectPage() {
+      const { data: { session } } = await supabase.auth.getSession();
 
-  status.textContent = "Sending Link…";
-  status.className = "text-white text-center mt-6 font-semibold";
+      if (session) {
+        loadReports();
+        return;
+      }
 
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: true,
-      emailRedirectTo: window.location.origin + "/admin.html"
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          loadReports();
+        }
+      });
+
+      setTimeout(async () => {
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) {
+          window.location.replace("/admin-login.html");
+        }
+      }, 3000);
     }
-  });
 
-  if (error) {
-    status.textContent = error.message;
-    status.className = "text-red-200 text-center mt-6 font-semibold";
-  } else {
-    status.textContent = "Check your Gmail";
-    status.className = "text-green-200 text-center mt-6 font-semibold";
-  }
-}
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      window.location.replace("/admin-login.html");
+    });
 
-checkSession();
-document.getElementById("sendOTPBtn").addEventListener("click", sendOTP);
-</script>
+    async function loadReports() {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="8" class="p-6 text-center text-gray-500">
+            Loading reports...
+          </td>
+        </tr>
+      `;
+
+      const { data, error } = await supabase
+        .from("reports")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="p-6 text-center text-red-600">
+              Failed to load reports
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tableBody.innerHTML = "";
+
+      data.forEach(r => {
+        let evidenceHTML = `<span class="text-gray-400">None</span>`;
+
+        if (Array.isArray(r.evidence) && r.evidence.length > 0) {
+          evidenceHTML = r.evidence.map(url => `
+            <img src="${url}" onclick="openPreview('${url}')"
+              class="w-20 h-20 object-cover rounded border mb-2 cursor-pointer">
+          `).join("");
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-4">${r.name ?? "Anonymous"}</td>
+          <td class="p-4">${r.grade_level ?? "-"}</td>
+          <td class="p-4">${r.section ?? "-"}</td>
+          <td class="p-4">${r.report_type ?? "-"}</td>
+          <td class="p-4">${r.description_where ?? "-"}</td>
+          <td class="p-4 text-sm">${r.description_what ?? "-"}</td>
+          <td class="p-4">${evidenceHTML}</td>
+          <td class="p-4">
+            <button
+              onclick="deleteReport('${r.id}')"
+              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm">
+              Delete
+            </button>
+          </td> <!-- 🔴 ADDED -->
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    /* 🔴 DELETE REPORT FUNCTION (ADDED) */
+    window.deleteReport = async function (id) {
+      if (!confirm("Are you sure you want to delete this report?")) return;
+
+      const { error } = await supabase
+        .from("reports")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        alert("Failed to delete report");
+        return;
+      }
+
+      loadReports();
+    };
+
+    /* 🔍 PREVIEW */
+    const previewModal = document.getElementById("previewModal");
+    const previewContent = document.getElementById("previewContent");
+    const closePreview = document.getElementById("closePreview");
+
+    window.openPreview = function (url) {
+      previewContent.innerHTML = `<img src="${url}" class="max-h-[80vh] rounded-lg">`;
+      previewModal.classList.remove("hidden");
+      previewModal.classList.add("flex");
+    };
+
+    closePreview.onclick = () => {
+      previewModal.classList.add("hidden");
+      previewModal.classList.remove("flex");
+    };
+
+    protectPage();
+  </script>
 
 </body>
 </html>
