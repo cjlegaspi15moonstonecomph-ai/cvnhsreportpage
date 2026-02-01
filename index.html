@@ -6,25 +6,6 @@
 <title>CVNHS Report Page</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- ✅ ADDED: Error styles + shake animation -->
-<style>
-  @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0); }
-  }
-
-  .shake {
-    animation: shake 0.4s;
-  }
-
-  .error-border {
-    border-color: #dc2626 !important;
-  }
-</style>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-blue-200 flex justify-center items-center p-4">
@@ -99,7 +80,7 @@
     <div>
       <label class="font-semibold text-gray-700">Description</label>
       <div class="space-y-3 mt-2">
-        <details class="rounded-xl border bg-gray-50 p-3">
+        <details class="rounded-xl border bg-gray-50 p-3"> 
           <summary class="font-semibold cursor-pointer">Saan ito nangyari? ↓</summary>
           <input id="desc_saan" required class="w-full mt-2 px-3 py-2 rounded-lg border">
         </details>
@@ -131,22 +112,18 @@
       </div>
     </div>
 
-    <!-- Evidence -->
+    <!-- Evidence Upload -->
     <div>
       <label class="font-semibold text-gray-700">Evidence (Images / Videos)</label>
-      <input type="file" id="media" multiple accept="image/*,video/*" class="w-full mt-1 p-2 rounded-xl border bg-white">
+      <input type="file" id="media" name="media" multiple accept="image/*,video/*" class="w-full mt-1 p-2 rounded-xl border bg-white">
       <div id="preview" class="flex flex-wrap gap-2 mt-2"></div>
     </div>
 
-    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold">
-      Submit Report
-    </button>
+    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold">Submit Report</button>
 
     <p id="status" class="text-center font-semibold"></p>
 
-    <button type="button" id="logoutBtn" class="w-full mt-3 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold">
-      Logout
-    </button>
+    <button type="button" id="logoutBtn" class="w-full mt-3 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl font-semibold">Logout</button>
 
   </form>
 </div>
@@ -154,56 +131,140 @@
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+// Initialize Supabase
 const supabase = createClient(
   "https://grkromlvleczjfkrzmol.supabase.co",
-  "YOUR_ANON_KEY"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
 );
 
-// Submit validation ADDITION
+const student = JSON.parse(localStorage.getItem('student'));
+if (!student) {
+  window.location.href = "/index-login.html";
+  throw new Error("Not logged in");
+} else {
+  document.getElementById('studentName').textContent =
+    `Logged in as: ${student.name || student.lrn}`;
+}
+
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("student");
+  window.location.replace("/index-login.html");
+});
+
+// Show Other field
+document.getElementById("report_type").addEventListener("change", function () {
+  const otherField = document.getElementById("otherField");
+  if (this.value === "Other") otherField.classList.remove("hidden");
+  else {
+    otherField.classList.add("hidden");
+    document.getElementById("otherInput").value = "";
+  }
+});
+
+// Preview
+const mediaInput = document.getElementById("media");
+const preview = document.getElementById("preview");
+mediaInput.addEventListener("change", function () {
+  preview.innerHTML = "";
+  Array.from(this.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement("div");
+      div.className = "w-24 h-24 border rounded-lg overflow-hidden";
+      if (file.type.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.className = "w-full h-full object-cover";
+        div.appendChild(img);
+      } else if (file.type.startsWith("video/")) {
+        const video = document.createElement("video");
+        video.src = e.target.result;
+        video.controls = true;
+        video.className = "w-full h-full object-cover";
+        div.appendChild(video);
+      }
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+// Submit
 document.getElementById("reportForm").addEventListener("submit", async function (e) {
   e.preventDefault();
-
   const status = document.getElementById("status");
-
-  const requiredFields = [
-    "desc_saan",
-    "desc_sino",
-    "desc_ano",
-    "desc_kailan",
-    "desc_bakit",
-    "desc_paano"
-  ];
-
-  let hasError = false;
-
-  requiredFields.forEach(id => {
-    const field = document.getElementById(id);
-    const details = field.closest("details");
-
-    field.classList.remove("error-border");
-    details.classList.remove("shake");
-
-    if (!field.value.trim()) {
-      hasError = true;
-      details.open = true;
-      field.classList.add("error-border");
-      void details.offsetWidth;
-      details.classList.add("shake");
-    }
-  });
-
-  if (hasError) {
-    status.textContent = "Please complete all required descriptions.";
-    status.className = "text-red-600 font-semibold";
-    return;
-  }
-
   status.textContent = "Submitting...";
   status.className = "text-gray-700 font-semibold";
 
-  // 🔒 original submit logic continues here (unchanged)
+  try {
+    // 1️⃣ Upload media
+    const uploadedUrls = [];
+
+    for (const file of mediaInput.files) {
+      const fileExt = file.name.split(".").pop();
+      const fileName =
+        `report-${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("evidence")
+        .upload(fileName, file, { upsert: false });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        continue;
+      }
+
+      const { data } = supabase.storage
+        .from("evidence")
+        .getPublicUrl(fileName);
+
+      uploadedUrls.push(data.publicUrl);
+    }
+
+    // 2️⃣ Insert report
+    const reportData = {
+      name: this.elements["name"].value || "Anonymous",
+      grade_level: this.elements["grade_level"].value,
+      section: this.elements["section"].value,
+      report_type: this.elements["report_type"].value,
+      description_where: document.getElementById("desc_saan").value,
+      description_who: document.getElementById("desc_sino").value,
+      description_what: document.getElementById("desc_ano").value,
+      description_when: document.getElementById("desc_kailan").value,
+      description_why: document.getElementById("desc_bakit").value,
+      description_how: document.getElementById("desc_paano").value,
+      evidence: uploadedUrls
+    };
+
+    const { error } = await supabase
+      .from("reports")
+      .insert([reportData]);
+
+    if (error) {
+      console.error(error);
+      status.textContent = "Report not submitted:" + error.message;
+      status.className = "text-red-600 font-semibold";
+      return;
+    }
+
+    // 3️⃣ Success
+    status.textContent = "Submit Successfully. Thank You!";
+    status.className = "text-green-600 font-semibold";
+    this.reset();
+    preview.innerHTML = "";
+    document.getElementById("otherField").classList.add("hidden");
+
+  } catch (err) {
+    console.error(err);
+    status.textContent = "There was an error. Please try again.";
+    status.className = "text-red-600 font-semibold";
+  }
 });
 </script>
+
+
+
 
 </body>
 </html>
