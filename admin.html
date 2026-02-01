@@ -219,7 +219,7 @@
         });
 
         const { error: storageError } = await supabase.storage
-          .from("reports") // your storage bucket
+          .from("evidence") // your storage bucket
           .remove(storagePaths);
 
         if (storageError) {
@@ -229,7 +229,7 @@
 
       // Delete report from database
       const { error } = await supabase
-        .from("reports")
+        .from("evidence")
         .delete()
         .eq("id", id);
 
