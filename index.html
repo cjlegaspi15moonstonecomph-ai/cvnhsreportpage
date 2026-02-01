@@ -6,6 +6,26 @@
 <title>CVNHS Report Page</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.4s;
+}
+
+.error-border {
+  border-color: #dc2626 !important;
+}
+</style>
+
+
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-blue-200 flex justify-center items-center p-4">
@@ -196,6 +216,49 @@ document.getElementById("reportForm").addEventListener("submit", async function 
   const status = document.getElementById("status");
   status.textContent = "Submitting...";
   status.className = "text-gray-700 font-semibold";
+
+  // 🔴 VALIDATION FOR DESCRIPTION FIELDS
+const requiredFields = [
+  "desc_saan",
+  "desc_sino",
+  "desc_ano",
+  "desc_kailan",
+  "desc_bakit",
+  "desc_paano"
+];
+
+let hasError = false;
+
+requiredFields.forEach(id => {
+  const field = document.getElementById(id);
+  const details = field.closest("details");
+
+  // reset styles
+  field.classList.remove("error-border");
+  details.classList.remove("shake");
+
+  if (!field.value.trim()) {
+    hasError = true;
+
+    // open the box
+    details.open = true;
+
+    // red border
+    field.classList.add("error-border");
+
+    // shake animation
+    void details.offsetWidth;
+    details.classList.add("shake");
+  }
+});
+
+if (hasError) {
+  const status = document.getElementById("status");
+  status.textContent = "Please complete all required description fields.";
+  status.className = "text-red-600 font-semibold";
+  return; // ⛔ STOP SUBMIT
+}
+
 
   try {
     // 1️⃣ Upload media
