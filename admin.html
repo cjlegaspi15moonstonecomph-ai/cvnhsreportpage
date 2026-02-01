@@ -195,7 +195,7 @@
           </td>
           <td class="p-4">${evidenceHTML}</td>
           <td class="p-4">
-            <button onclick="deleteReport('${r.id}', ${JSON.stringify(r.evidence || [])})" 
+            <button onclick="deleteReport('${r.id}', '${JSON.stringify(r.evidence || []).replace(/'/g, "\\'")}')" 
               class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">
               Delete
             </button>
@@ -206,7 +206,9 @@
     }
 
     /* 🗑 DELETE REPORT + EVIDENCE */
-    window.deleteReport = async function(id, evidenceFiles) {
+    window.deleteReport = async function(id, evidenceFilesString) {
+      const evidenceFiles = JSON.parse(evidenceFilesString);
+
       if (!confirm("Are you sure you want to delete this report and its evidence?")) return;
 
       // Delete evidence files from Supabase Storage
@@ -217,7 +219,7 @@
         });
 
         const { error: storageError } = await supabase.storage
-          .from("reports") // make sure your storage bucket is called "reports"
+          .from("reports") // your storage bucket
           .remove(storagePaths);
 
         if (storageError) {
