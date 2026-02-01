@@ -43,7 +43,7 @@
             <th class="p-4 text-left">Location</th>
             <th class="p-4 text-left">Description</th>
             <th class="p-4 text-left">Evidence</th>
-            <th class="p-4 text-left">Actions</th>
+            <th class="p-4 text-left">Actions</th> <!-- NEW COLUMN -->
           </tr>
         </thead>
 
@@ -58,7 +58,7 @@
     </div>
   </div>
 
-  <!-- 🔍 PREVIEW MODAL -->
+  <!-- 🔍 PREVIEW MODAL (ADDED) -->
   <div id="previewModal"
     class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
 
@@ -195,7 +195,7 @@
           </td>
           <td class="p-4">${evidenceHTML}</td>
           <td class="p-4">
-            <button onclick="deleteReport('${r.id}', '${JSON.stringify(r.evidence || []).replace(/'/g, "\\'")}')" 
+            <button onclick="deleteReport('${r.id}')" 
               class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">
               Delete
             </button>
@@ -205,29 +205,10 @@
       });
     }
 
-    /* DELETE REPORT + EVIDENCE */
-    window.deleteReport = async function(id, evidenceFilesString) {
-      const evidenceFiles = JSON.parse(evidenceFilesString);
+    /* 🗑 DELETE REPORT */
+    window.deleteReport = async function(id) {
+      if (!confirm("Are you sure you want to delete this report?")) return;
 
-      if (!confirm("Are you sure you want to delete this report and its evidence?")) return;
-
-      // Delete evidence files from Supabase Storage
-      if (Array.isArray(evidenceFiles) && evidenceFiles.length > 0) {
-        const storagePaths = evidenceFiles.map(url => {
-          const urlObj = new URL(url);
-          return decodeURIComponent(urlObj.pathname.split("/").slice(2).join("/"));
-        });
-
-        const { error: storageError } = await supabase.storage
-          .from("evidence") // your storage bucket
-          .remove(storagePaths);
-
-        if (storageError) {
-          alert("Failed to delete some evidence files: " + storageError.message);
-        }
-      }
-
-      // Delete report from database
       const { error } = await supabase
         .from("reports")
         .delete()
@@ -241,7 +222,7 @@
       loadReports();
     };
 
-    /* 🔍 PREVIEW LOGIC */
+    /* 🔍 PREVIEW LOGIC (ADDED) */
     const previewModal = document.getElementById("previewModal");
     const previewContent = document.getElementById("previewContent");
     const closePreview = document.getElementById("closePreview");
