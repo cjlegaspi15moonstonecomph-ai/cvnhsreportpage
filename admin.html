@@ -59,129 +59,185 @@
     </div>
   </div>
 
+  <!-- 🔍 PREVIEW MODAL (ADDED) -->
+  <div id="previewModal"
+    class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+
+    <div class="bg-white rounded-xl p-4 max-w-3xl w-full relative">
+      <button id="closePreview"
+        class="absolute top-3 right-3 text-gray-600 hover:text-black text-xl font-bold">
+        ✕
+      </button>
+
+      <div id="previewContent" class="flex justify-center items-center"></div>
+    </div>
+  </div>
+
   <!-- Supabase -->
-   <script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const supabase = createClient(
-  "https://grkromlvleczjfkrzmol.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
-);
+    const supabase = createClient(
+      "https://grkromlvleczjfkrzmol.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdya3JvbWx2bGVjempma3J6bW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjA4NzksImV4cCI6MjA4MDU5Njg3OX0.LsLCiNTbj9kmXEdgtbkSXrEVQgXye0kOQoE35EBx9v0"
+    );
 
-const tableBody = document.getElementById("reportsTable");
-const logoutBtn = document.getElementById("logoutBtn");
+    const tableBody = document.getElementById("reportsTable");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-/* ✅ PROTECT PAGE + LOAD REPORTS */
-async function protectPage() {
-  const { data: { session } } = await supabase.auth.getSession();
+    /* ✅ PROTECT PAGE + LOAD REPORTS */
+    async function protectPage() {
+      const { data: { session } } = await supabase.auth.getSession();
 
-  if (session) {
-    loadReports();
-    return;
-  }
+      if (session) {
+        loadReports();
+        return;
+      }
 
-  // ⏳ Wait for magic link login
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_IN" && session) {
-      loadReports();
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          loadReports();
+        }
+      });
+
+      setTimeout(async () => {
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) {
+          window.location.replace("/admin-login.html");
+        }
+      }, 3000);
     }
-  });
 
-  // 🔒 Fallback redirect
-  setTimeout(async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
+    /* 🚪 LOGOUT */
+    logoutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
       window.location.replace("/admin-login.html");
-    }
-  }, 3000);
-}
+    });
 
-/* 🚪 LOGOUT */
-logoutBtn.addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  window.location.replace("/admin-login.html");
-});
+    /* 📥 LOAD REPORTS */
+    async function loadReports() {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="p-6 text-center text-gray-500">
+            Loading reports...
+          </td>
+        </tr>
+      `;
 
-/* 📥 LOAD REPORTS */
-async function loadReports() {
-  tableBody.innerHTML = `
-    <tr>
-      <td colspan="7" class="p-6 text-center text-gray-500">
-        Loading reports...
-      </td>
-    </tr>
-  `;
+      const { data, error } = await supabase
+        .from("reports")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  const { data, error } = await supabase
-    .from("reports")
-    .select("*")
-    .order("created_at", { ascending: false });
+      if (error) {
+        console.error(error);
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="p-6 text-center text-red-600">
+              Failed to load reports
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
-  if (error) {
-    console.error(error);
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="p-6 text-center text-red-600">
-          Failed to load reports
-        </td>
-      </tr>
-    `;
-    return;
-  }
+      if (!data || data.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="p-6 text-center text-gray-500">
+              No reports found
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="p-6 text-center text-gray-500">
-          No reports found
-        </td>
-      </tr>
-    `;
-    return;
-  }
+      tableBody.innerHTML = "";
 
-  tableBody.innerHTML = "";
+      data.forEach(r => {
+        let evidenceHTML = `<span class="text-gray-400">None</span>`;
 
-  data.forEach(r => {
-    let evidenceHTML = `<span class="text-gray-400">None</span>`;
+        if (Array.isArray(r.evidence) && r.evidence.length > 0) {
+          evidenceHTML = r.evidence.map(url => {
+            if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+              return `
+                <img src="${url}"
+                  onclick="openPreview('${url}')"
+                  class="w-20 h-20 object-cover rounded border mb-2 cursor-pointer hover:scale-105 transition">
+              `;
+            }
 
-    if (Array.isArray(r.evidence) && r.evidence.length > 0) {
-      evidenceHTML = r.evidence.map(url => {
-        if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-          return `<img src="${url}" class="w-20 h-20 object-cover rounded border mb-2">`;
+            if (url.match(/\.(mp4|webm|ogg)$/i)) {
+              return `
+                <video src="${url}"
+                  onclick="openPreview('${url}')"
+                  class="w-32 rounded border mb-2 cursor-pointer"
+                  muted></video>
+              `;
+            }
+
+            return `<a href="${url}" target="_blank" class="text-blue-600 underline block">View File</a>`;
+          }).join("");
         }
-        if (url.match(/\.(mp4|webm|ogg)$/i)) {
-          return `<video src="${url}" controls class="w-32 rounded border mb-2"></video>`;
-        }
-        return `<a href="${url}" target="_blank" class="text-blue-600 underline block">View File</a>`;
-      }).join("");
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-4">${r.name ?? "Anonymous"}</td>
+          <td class="p-4">${r.grade_level ?? "-"}</td>
+          <td class="p-4">${r.section ?? "-"}</td>
+          <td class="p-4">${r.report_type ?? "-"}</td>
+          <td class="p-4">${r.description_where ?? "-"}</td>
+          <td class="p-4 text-sm">
+            <strong>Sino:</strong> ${r.description_who || "-"}<br>
+            <strong>Ano:</strong> ${r.description_what || "-"}<br>
+            <strong>Kailan:</strong> ${r.description_when || "-"}<br>
+            <strong>Bakit:</strong> ${r.description_why || "-"}<br>
+            <strong>Paano:</strong> ${r.description_how || "-"}
+          </td>
+          <td class="p-4">${evidenceHTML}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
     }
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="p-4">${r.name ?? "Anonymous"}</td>
-      <td class="p-4">${r.grade_level ?? "-"}</td>
-      <td class="p-4">${r.section ?? "-"}</td>
-      <td class="p-4">${r.report_type ?? "-"}</td>
-      <td class="p-4">${r.description_where ?? "-"}</td>
-      <td class="p-4 text-sm">
-        <strong>Sino:</strong> ${r.description_who || "-"}<br>
-        <strong>Ano:</strong> ${r.description_what || "-"}<br>
-        <strong>Kailan:</strong> ${r.description_when || "-"}<br>
-        <strong>Bakit:</strong> ${r.description_why || "-"}<br>
-        <strong>Paano:</strong> ${r.description_how || "-"}
-      </td>
-      <td class="p-4">${evidenceHTML}</td>
-    `;
-    tableBody.appendChild(tr);
-  });
-}
+    /* 🔍 PREVIEW LOGIC (ADDED) */
+    const previewModal = document.getElementById("previewModal");
+    const previewContent = document.getElementById("previewContent");
+    const closePreview = document.getElementById("closePreview");
 
-/* 🚀 START */
-protectPage();
-</script>
+    window.openPreview = function (url) {
+      previewContent.innerHTML = "";
 
+      if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+        const img = document.createElement("img");
+        img.src = url;
+        img.className = "max-h-[80vh] rounded-lg";
+        previewContent.appendChild(img);
+      } else {
+        const video = document.createElement("video");
+        video.src = url;
+        video.controls = true;
+        video.autoplay = true;
+        video.className = "max-h-[80vh] rounded-lg";
+        previewContent.appendChild(video);
+      }
 
+      previewModal.classList.remove("hidden");
+      previewModal.classList.add("flex");
+    };
+
+    closePreview.addEventListener("click", () => {
+      previewModal.classList.add("hidden");
+      previewModal.classList.remove("flex");
+    });
+
+    previewModal.addEventListener("click", e => {
+      if (e.target === previewModal) closePreview.click();
+    });
+
+    /* 🚀 START */
+    protectPage();
+  </script>
 
 </body>
 </html>
