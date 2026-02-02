@@ -123,6 +123,24 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     }
 
+    #GradelevelBtn {
+      width: 100%;
+      margin-top: 8px;
+      border-radius: 16px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.3);
+      color: white;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    #GradelevelBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
     #status {
       text-align: center;
       margin-top: 14px;
@@ -157,8 +175,12 @@
       <p id="status"></p>
     </form>
 
-    <!-- Forgot LRN button -->
+    <!-- Section Code button -->
     <button id="forgotLrnBtn">Log In By Section Code</button>
+  </div>
+
+  <!-- Grade Level Code Buttong -->
+    <button id="GradelevelBtn">Log In By Grade Level Code</button>
   </div>
 
   <script>
