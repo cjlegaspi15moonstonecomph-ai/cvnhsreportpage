@@ -312,17 +312,29 @@ if (hasError) {
       return;
     }
 
-    // 📧 SEND EMAIL TO TEACHER
-   await fetch(
-      "https://grkromlvleczjfkrzmol.supabase.co/functions/v1/send-report-email",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(reportData),
+    try {
+  // 📧 SEND EMAIL TO TEACHER
+  const emailRes = await fetch(
+    "https://grkromlvleczjfkrzmol.supabase.co/functions/v1/send-report-email",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(reportData),
+    }
+  );
+
+  if (!emailRes.ok) {
+    const errorText = await emailRes.text();
+    console.error("Email function failed:", errorText);
+  } else {
+    console.log("Email sent successfully");
   }
-);
+} catch (emailErr) {
+  console.error("Error calling email function:", emailErr);
+}
+
 
     // 3️⃣ Success
     status.textContent = "Submit Successfully. Thank You!";
