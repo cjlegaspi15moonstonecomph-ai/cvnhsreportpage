@@ -312,6 +312,18 @@ if (hasError) {
       return;
     }
 
+    // 📧 SEND EMAIL TO TEACHER
+   await fetch(
+      "https://grkromlvleczjfkrzmol.supabase.co/functions/v1/send-report-email",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(reportData),
+  }
+);
+
     // 3️⃣ Success
     status.textContent = "Submit Successfully. Thank You!";
     status.className = "text-green-600 font-semibold";
