@@ -1,0 +1,7 @@
+node_modules/
+.env
+.next/
+.vercel/
+uploads/
+create-admin.js
+

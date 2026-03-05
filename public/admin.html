@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Admin Dashboard - Reports</title>
+
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: #eef1f5;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    background: #1e3a8a;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  header span {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .logout-btn {
+    padding: 8px 14px;
+    background: #ef4444;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .logout-btn:hover {
+    background: #dc2626;
+  }
+
+  .container {
+    width: 95%;
+    margin: 25px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+
+  h2 {
+    margin-top: 0;
+    font-size: 22px;
+    color: #1e3a8a;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: #1e3a8a;
+    color: white;
+    font-size: 14px;
+  }
+
+  tr:hover {
+    background: #f3f4f6;
+  }
+
+  .evidence-img {
+    width: 120px;
+    border-radius: 8px;
+    margin: 5px 0;
+    display: block;
+  }
+
+  video {
+    width: 160px;
+    margin-top: 5px;
+    border-radius: 8px;
+  }
+
+  .file-link {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-top: 5px;
+    font-size: 13px;
+  }
+
+  .file-link:hover {
+    background: #1d4ed8;
+  }
+
+  .description {
+    white-space: pre-wrap; /* preserve line breaks from textarea */
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 30px;
+    font-size: 18px;
+    color: gray;
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <span>Admin Dashboard – Submitted Reports</span>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+  <h2>All Reports</h2>
+  <table id="reportsTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Grade</th>
+        <th>Type of Report</th>
+        <th>Location</th>
+        <th>Description
+        <th>Evidence</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="reportBody">
+      <tr><td colspan="7" class="no-data">Loading reports...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+async function loadReports() {
+  try {
+    const res = await fetch("/api/admin/getReports");
+
+    // Not logged in → redirect
+    if (res.status === 401) {
+      window.location.href = "/admin-login.html";
+      return;
+    }
+
+    const data = await res.json();
+    const body = document.getElementById("reportBody");
+    body.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      body.innerHTML = '<tr><td colspan="7" class="no-data">No reports found.</td></tr>';
+      return;
+    }
+
+    data.forEach(r => {
+      let evidenceHTML = "No file";
+
+      if (Array.isArray(r.raw_media_urls) && r.raw_media_urls.length > 0) {
+        evidenceHTML = r.raw_media_urls.map(url => {
+          const ext = url.split(".").pop().toLowerCase();
+
+          if (["jpg","jpeg","png","gif"].includes(ext)) {
+            return `<img src="${url}" class="evidence-img">`;
+          }
+
+          if (["mp4","webm","ogg"].includes(ext)) {
+            return `<video controls src="${url}"></video>`;
+          }
+
+          return `<a class="file-link" href="${url}" target="_blank">View File</a>`;
+        }).join("");
+      }
+
+      const date = r.created_at
+        ? new Date(r.created_at).toLocaleString()
+        : "";
+
+      body.innerHTML += `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.grade}</td>
+          <td>${r.reportType}</td>
+          <td>${r.location}</td>
+          <td class="description">${r.description}</td>
+          <td>${evidenceHTML}</td>
+          <td>${date}</td>
+        </tr>
+      `;
+    });
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById("reportBody").innerHTML =
+      `<tr><td colspan="7" class="no-data">Error loading reports</td></tr>`;
+  }
+}
+
+async function logout() {
+  await fetch("/api/admin/logout");
+  window.location.href = "/admin-login.html";
+}
+
+loadReports();
+</script>
+
+</body>
+</html>
