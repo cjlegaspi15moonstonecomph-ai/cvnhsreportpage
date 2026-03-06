@@ -164,8 +164,7 @@ if (!student) {
   throw new Error("Not logged in");
 } else {
   document.getElementById('studentName').textContent =
-    `Logged in as: ${student.name || student.lrn}`;
-    `Logged in as: ${student.sections}`;
+    `Logged in as: ${student.name || student.lrn} (${student.section || "No Section"})`;
 }
 
 // Logout
